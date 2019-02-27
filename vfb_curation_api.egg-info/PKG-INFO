@@ -1,0 +1,17 @@
+Metadata-Version: 1.1
+Name: vfb-curation-api
+Version: 1.0.0
+Summary: An API that encapsulates curation processes of the Virtual Flybrain Project
+Home-page: https://github.com/VirtualFlyBrain/vfb_curation_api
+Author: Nicolas Matentzoglu
+Author-email: UNKNOWN
+License: UNKNOWN
+Description-Content-Type: UNKNOWN
+Description: UNKNOWN
+Keywords: rest flask swagger flask-restplus virtual-fly-brain
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Virtual Fly Brain
+Classifier: License :: Apache License Version 2.0
+Classifier: Programming Language :: Python :: 3.6
