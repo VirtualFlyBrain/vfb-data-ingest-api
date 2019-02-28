@@ -3,9 +3,9 @@ import os
 
 class VFBKB():
     def __init__(self):
-        os.environ["KBserver"] = "http://localhost:7474"
-        os.environ["KBuser"] = "neo4j"
-        os.environ["KBpassword"] = "neo4j/neo"
+        #os.environ["KBserver"] = "http://localhost:7474"
+        #os.environ["KBuser"] = "neo4j"
+        #os.environ["KBpassword"] = "neo4j/neo"
         kb = os.getenv('KBserver')
         user = os.getenv('KBuser')
         password = os.getenv('KBpassword')
