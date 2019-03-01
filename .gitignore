@@ -1,1 +1,3 @@
 .idea
+*.pyc
+vfb_curation_api/__pycache__/settings.cpython-36.pyc

@@ -5,8 +5,7 @@ from flask_restplus import Resource
 from vfb_curation_api.api.vfbid.business import create_neuron
 from vfb_curation_api.api.vfbid.serializers import neuron, neurons_for_dataset
 from vfb_curation_api.api.restplus import api
-from vfb_curation_api.database.models import Neuron
-from vfb_curation_api.database import db
+from vfb_curation_api.database.repository import db
 
 log = logging.getLogger(__name__)
 

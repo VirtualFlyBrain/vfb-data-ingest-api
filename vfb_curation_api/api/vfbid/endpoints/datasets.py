@@ -5,7 +5,9 @@ from flask_restplus import Resource
 from vfb_curation_api.api.vfbid.business import create_datatset
 from vfb_curation_api.api.vfbid.serializers import dataset, page_of_datasets
 from vfb_curation_api.api.restplus import api
-from vfb_curation_api.database import db
+from vfb_curation_api.database.repository import db
+
+
 
 log = logging.getLogger(__name__)
 

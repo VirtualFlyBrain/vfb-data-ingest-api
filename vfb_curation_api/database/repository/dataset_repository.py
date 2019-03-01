@@ -1,5 +1,5 @@
-from vfb_curation_api.database import db
 from vfb_curation_api.database.repository.repository import IllegalProjectError, DatasetWithSameNameExistsError
+from vfb_curation_api.database.repository import db
 import re
 
 iri_base = ": http://virtualflybrain.org/data/"

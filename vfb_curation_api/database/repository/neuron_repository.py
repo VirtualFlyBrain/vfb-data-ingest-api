@@ -1,5 +1,5 @@
-from vfb_curation_api.database import db
 from vfb_curation_api.database.repository.repository import IllegalProjectError
+from vfb_curation_api.database.repository import db
 import base36
 
 iri_base = "http://virtualflybrain.org/reports/VFB_"
@@ -18,7 +18,8 @@ def create_neuron_db(Neuron):
             iris = [0]
         id = max(iris) + 1
         if id <= max_base36:
-            idstring = f'{id:04}'
+            id = base36.dumps(id)
+            idstring = id.zfill(4)
             id = project + str(idstring)
             vfb_id = iri_base + id
             print(vfb_id)
