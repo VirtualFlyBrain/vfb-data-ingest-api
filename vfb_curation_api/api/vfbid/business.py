@@ -20,6 +20,7 @@ def create_neuron(data):
     alternative_names = data.get('alternative_names')
     external_identifiers = data.get('external_identifiers')
     classification = data.get('classification')
+    dataset_id = data.get('dataset_id')
     classification_comment = data.get('classification_comment')
     url_skeleton_id = data.get('url_skeleton_id')
     template_id = data.get('template_id')
@@ -33,6 +34,7 @@ def create_neuron(data):
     n.set_template_id(template_id)
     n.set_imaging_type(imaging_type)
     n.set_classification_comment(classification_comment)
+    n.set_dataset_id(dataset_id)
     return create_neuron_db(n)
 
 

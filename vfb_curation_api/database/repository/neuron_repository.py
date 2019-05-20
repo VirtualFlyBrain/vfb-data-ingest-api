@@ -46,7 +46,7 @@ def create_neuron_db(Neuron):
             db.query(q=q)
 
             if Neuron.dataset_id:
-                q = "MATCH (n:Individual {iri:'%s'}) MATCH (d:DataSet {iri:'%s%'}) MERGE (n)-[:has_reference]-(d)" % (vfb_id, Neuron.dataset_id)
+                q = "MATCH (n:Individual {iri:'%s'}) MATCH (d:DataSet {iri:'%s'}) MERGE (n)-[:has_reference]-(d)" % (vfb_id, Neuron.dataset_id)
                 db.query(q=q)
             if Neuron.classification:
                 q = "MATCH (n:Individual {iri:'%s'}) MATCH (d:Class {iri:'%s'}) MERGE (n)-[:INSTANCEOF]-(d)" % (vfb_id, Neuron.classification)

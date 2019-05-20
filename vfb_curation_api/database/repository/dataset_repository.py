@@ -2,7 +2,7 @@ from vfb_curation_api.database.repository.repository import IllegalProjectError,
 from vfb_curation_api.database.repository import db
 import re
 
-iri_base = ": http://virtualflybrain.org/data/"
+iri_base = "http://virtualflybrain.org/data/"
 
 
 def create_dataset_db(Dataset):
