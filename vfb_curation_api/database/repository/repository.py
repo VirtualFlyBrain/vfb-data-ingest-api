@@ -16,6 +16,8 @@ class VFBKB():
             try:
                 self.db = GraphDatabase(self.kb, username=self.user, password=self.password)
                 self.prepare_database()
+                if os.getenv('LOAD_TEST_DATA'):
+                    self.load_test_data()
                 return True
             except:
                 print("Database could not be created.")
@@ -65,6 +67,12 @@ class VFBKB():
         q_projectid_unique = "CREATE CONSTRAINT ON (a:Project) ASSERT a.projectid IS UNIQUE"
         self.db.query(q_orcid_unique)
         self.db.query(q_projectid_unique)
+
+    def load_test_data(self):
+        test_cypher_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '../testdata.cypher'))
+        with open(test_cypher_path, 'r') as file:
+            q_test_data = file.read()
+        self.db.query(q_test_data)
 
 
 class IllegalProjectError(Exception):
