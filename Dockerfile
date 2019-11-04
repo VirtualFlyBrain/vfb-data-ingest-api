@@ -3,6 +3,7 @@ FROM python:3.6.2
 ENV KBserver=http://localhost:7474
 ENV KBuser=neo4j
 ENV KBpassword=password
+ENV LOAD_TEST_DATA=True
 
 RUN mkdir /code
 ADD requirements.txt /code

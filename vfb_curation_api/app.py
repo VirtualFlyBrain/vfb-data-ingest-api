@@ -3,8 +3,8 @@ import logging.config
 import os
 from flask import Flask, Blueprint
 from vfb_curation_api import settings
-from vfb_curation_api.api.vfbid.endpoints.datasets import ns as blog_posts_namespace
-from vfb_curation_api.api.vfbid.endpoints.neurons import ns as blog_categories_namespace
+from vfb_curation_api.api.vfbid.endpoints.datasets import ns as datasets_namespace
+from vfb_curation_api.api.vfbid.endpoints.neurons import ns as neurons_namespace
 from vfb_curation_api.api.restplus import api
 
 app = Flask(__name__)
@@ -20,6 +20,7 @@ def configure_app(flask_app):
     flask_app.config['RESTPLUS_VALIDATE'] = settings.RESTPLUS_VALIDATE
     flask_app.config['RESTPLUS_MASK_SWAGGER'] = settings.RESTPLUS_MASK_SWAGGER
     flask_app.config['ERROR_404_HELP'] = settings.RESTPLUS_ERROR_404_HELP
+    flask_app.config['LOAD_TEST_DATA'] = settings.LOAD_TEST_DATA
 
 
 def initialize_app(flask_app):
@@ -27,8 +28,8 @@ def initialize_app(flask_app):
 
     blueprint = Blueprint('api', __name__, url_prefix='/api')
     api.init_app(blueprint)
-    api.add_namespace(blog_posts_namespace)
-    api.add_namespace(blog_categories_namespace)
+    api.add_namespace(datasets_namespace)
+    api.add_namespace(neurons_namespace)
     flask_app.register_blueprint(blueprint)
 
 def main():

@@ -1,5 +1,5 @@
 VERSION = "v0.0.1" 
-IM=matentzn/vfb-curation-api
+IM=matentzn/vfb-data-ingest-api
 
 docker-build:
 	@docker build -t $(IM):$(VERSION) . \
