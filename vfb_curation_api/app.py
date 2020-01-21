@@ -4,7 +4,13 @@ import os
 from flask import Flask, Blueprint
 from vfb_curation_api import settings
 from vfb_curation_api.api.vfbid.endpoints.datasets import ns as datasets_namespace
+from vfb_curation_api.api.vfbid.endpoints.dataset import ns as dataset_namespace
 from vfb_curation_api.api.vfbid.endpoints.neurons import ns as neurons_namespace
+from vfb_curation_api.api.vfbid.endpoints.neuron import ns as neuron_namespace
+from vfb_curation_api.api.vfbid.endpoints.project import ns as project_namespace
+from vfb_curation_api.api.vfbid.endpoints.projects import ns as projects_namespace
+from vfb_curation_api.api.vfbid.endpoints.login import ns as login_namespace
+from vfb_curation_api.api.vfbid.endpoints.user import ns as user_namespace
 from vfb_curation_api.api.restplus import api
 
 app = Flask(__name__)
@@ -25,17 +31,35 @@ def configure_app(flask_app):
 
 def initialize_app(flask_app):
     configure_app(flask_app)
-
     blueprint = Blueprint('api', __name__, url_prefix='/api')
     api.init_app(blueprint)
     api.add_namespace(datasets_namespace)
     api.add_namespace(neurons_namespace)
+    api.add_namespace(neuron_namespace)
+    api.add_namespace(dataset_namespace)
+    api.add_namespace(project_namespace)
+    api.add_namespace(projects_namespace)
+    api.add_namespace(user_namespace)
+    api.add_namespace(login_namespace)
     flask_app.register_blueprint(blueprint)
 
+
+#def setting_environment_variables():
+#    print("SETTTTTTIIINNNNG ENVIRONMENT PLEASE KILL ME.")
+#    print("SETTTTTTIIINNNNG ENVIRONMENT PLEASE KILL ME.")
+#    print("SETTTTTTIIINNNNG ENVIRONMENT PLEASE KILL ME.")
+#    print("SETTTTTTIIINNNNG ENVIRONMENT PLEASE KILL ME.")
+#    os.environ["KBserver"] = "http://localhost:7474"
+#    os.environ["KBuser"] = "neo4j"
+#    os.environ["KBpassword"] = "neo"
+#    os.environ["LOAD_TEST_DATA"] = "True"
+
+
 def main():
+    #setting_environment_variables()
     initialize_app(app)
     log.info('>>>>> Starting development server at http://{}/api/ <<<<<'.format(app.config['SERVER_NAME']))
-    app.run(host='0.0.0.0',debug=settings.FLASK_DEBUG)
+    app.run(host='0.0.0.0', debug=settings.FLASK_DEBUG)
 
 
 if __name__ == "__main__":
