@@ -19,5 +19,5 @@ setup(
 
     packages=find_packages(),
 
-    install_requires=['flask-restplus==0.9.2', 'Flask-SQLAlchemy==2.1'],
+    install_requires=['flask-restplus==0.13', 'Flask-SQLAlchemy==2.4.1'],
 )

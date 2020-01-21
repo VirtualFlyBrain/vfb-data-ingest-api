@@ -1,16 +1,15 @@
-from vfb_curation_api.database.models import Neuron, Dataset
-from vfb_curation_api.database.repository.neuron_repository import create_neuron_db
-from vfb_curation_api.database.repository.dataset_repository import create_dataset_db
+from vfb_curation_api.database.models import Neuron, Dataset, Project
+from vfb_curation_api.database.repository import db
 
-def create_datatset(data):
-    orcid = data.get('orcid')
+def create_dataset(data, orcid):
     project = data.get('project')
     short_name = data.get('short_name')
     title = data.get('title')
     publication = data.get('publication')
     source_data = data.get('source_data')
     ds = Dataset(orcid, project, short_name, title, publication, source_data)
-    return create_dataset_db(ds)
+    return db.create_dataset(ds, orcid)
+
 
 def create_neuron(data):
     orcid = data.get('orcid')
@@ -35,6 +34,14 @@ def create_neuron(data):
     n.set_imaging_type(imaging_type)
     n.set_classification_comment(classification_comment)
     n.set_dataset_id(dataset_id)
-    return create_neuron_db(n)
+    return db.create_neuron_db(n)
 
 
+def create_project(data):
+    projectid = data.get('projectid')
+    ds = Project(projectid)
+    return db.create_project_db(ds)
+
+
+def valid_user(apikey, orcid):
+    return db.valid_user(apikey, orcid)

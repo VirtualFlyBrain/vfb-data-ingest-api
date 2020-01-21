@@ -1,23 +1,19 @@
 from random import randint
 
 class Dataset():
-    def __init__(self, orcid, project, short_name, title, publication, source_data):
-        self.id = randint(0, 9999)
+    def __init__(self, id, short_name, title, publication="", source_data=""):
+        self.id = id
         self.short_name = short_name
         self.title = title
         self.publication = publication
         self.source_data = source_data
-        self.orcid = orcid
-        self.project = project
 
     def __repr__(self):
         return '<Dataset %r>' % self.title
 
 
 class Neuron():
-    def __init__(self, orcid, project, primary_name):
-        self.orcid = orcid
-        self.project = project
+    def __init__(self, primary_name):
         self.primary_name = primary_name
         self.dataset_id = ""
         self.type_specimen = ""
@@ -61,3 +57,19 @@ class Neuron():
 
     def __repr__(self):
         return '<Neuron %r>' % self.name
+
+
+class Project():
+    def __init__(self, id):
+        self.id = id
+
+    def __repr__(self):
+        return '<Project %r>' % self.id
+
+
+class User():
+    def __init__(self, id):
+        self.id = id
+
+    def __repr__(self):
+        return '<Project %r>' % self.id
