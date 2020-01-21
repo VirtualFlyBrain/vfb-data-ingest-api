@@ -1,0 +1,31 @@
+MERGE (n1:Project {iri:'http://virtualflybrain.org/project/ABCD'})
+MERGE (n2:Project {iri:'http://virtualflybrain.org/project/'})
+MERGE (p1:Person {iri:'https://orcid.org/1234', apikey: 'xyz'})
+MERGE (p2:Person {iri:'https://orcid.org/4321', apikey: 'wyz'})
+MERGE (d1:DataSet {iri:'http://virtualflybrain.org/data/Zoglu2020', short_form:'Zoglu2020', label:'ZOG20', production: false})
+MERGE (d2:DataSet {iri:'http://virtualflybrain.org/data/Zoglu2030', short_form:'Zoglu2030', label:'ZOG30', production: false})
+MERGE (d3:DataSet {iri:'http://virtualflybrain.org/data/Zoglu2040', short_form:'Zoglu2040', label:'ZOG40', production: false})
+MERGE (d4:DataSet {iri:'http://virtualflybrain.org/data/Dos2020', short_form:'Dos2020', production: false})
+MERGE (i1:Individual {iri:'http://virtualflybrain.org/reports/VFB_0000ABCD', short_name:'VFB_0000ABCD', production: false})
+MERGE (i2:Individual {iri:'http://virtualflybrain.org/reports/VFB_0001ABCD', short_name:'VFB_0001ABCD', production: false})
+MERGE (i3:Individual {iri:'http://virtualflybrain.org/reports/VFB_0002ABCD', short_name:'VFB_0002ABCD', production: false})
+MERGE (i4:Individual {iri:'http://virtualflybrain.org/reports/VFB_0000DCBA', short_name:'VFB_0000DCBA', production: false})
+
+MERGE (n1)<-[:has_admin_permissions]-(p1)
+MERGE (n2)<-[:has_admin_permissions]-(p2)
+
+MERGE (n1)<-[:has_associated_project]-(d1)
+MERGE (n1)<-[:has_associated_project]-(d2)
+MERGE (n1)<-[:has_associated_project]-(d3)
+
+MERGE (n2)<-[:has_associated_project]-(d4)
+
+MERGE (n1)<-[:has_associated_project]-(i1)
+MERGE (d1)<-[:has_reference]-(i1)
+MERGE (n1)<-[:has_associated_project]-(i2)
+MERGE (d1)<-[:has_reference]-(i2)
+MERGE (n1)<-[:has_associated_project]-(i3)
+MERGE (d1)<-[:has_reference]-(i3)
+
+MERGE (n2)<-[:has_associated_project]-(i4)
+MERGE (d4)<-[:has_reference]-(i4)

@@ -7,8 +7,27 @@ from sqlalchemy.orm.exc import NoResultFound
 
 log = logging.getLogger(__name__)
 
+authorizations = {
+    'apikey': {
+        'type': 'apiKey',
+        'in': 'header',
+        'name': 'X-API'
+    },
+    'oauth2': {
+        'type': 'oauth2',
+        'flow': 'accessCode',
+        'tokenUrl': 'https://orcid.org/oauth/token',
+        'authorizationUrl': 'https://orcid.org/oauth/authorize',
+        'redirect_uri' : 'http://localhost:5000/api',
+        'scopes': {
+            '/authenticate': 'No API call. Client retrieves access token only.',
+        }
+    }
+}
+
 api = Api(version='1.0', title='VFB Identifier API',
-          description='An API for creating and updating VFB identifiers.')
+          description='An API for creating and updating VFB identifiers.', authorizations=authorizations)
+
 
 
 @api.errorhandler
