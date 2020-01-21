@@ -1,3 +1,6 @@
 .idea
 *.pyc
 vfb_curation_api/__pycache__/settings.cpython-36.pyc
+.DS_Store
+vfb_curation_api/vfb
+vfb_curation_api/tmp

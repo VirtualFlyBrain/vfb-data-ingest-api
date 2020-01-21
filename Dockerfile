@@ -7,23 +7,23 @@ ENV LOAD_TEST_DATA=True
 
 RUN mkdir /code
 ADD requirements.txt /code
+ADD run.sh /code
+ADD logging.conf /code
+RUN chmod 777 /code/run.sh
 RUN pip install -r /code/requirements.txt
-ADD . /code
-WORKDIR /code/vfb_rest
+ADD vfb_curation_api/ /code/vfb_curation_api
+ADD setup.py /code
+WORKDIR /code
 
-#RUN echo -e "travis_fold:start:processLoad" && \
-#cd "/code" && \
-#echo '** Git checkout VFB_neo4j **' && \
-#git clone --quiet https://github.com/VirtualFlyBrain/VFB_neo4j.git
+RUN echo "Installing VFB neo4j tools" && \
+cd /tmp && \
+git clone --quiet https://github.com/VirtualFlyBrain/VFB_neo4j.git
 
-#RUN cd "/code" && \
-#echo -e "travis_fold:end:processLoad"
+RUN mkdir /code/vfb
 
-#RUN mkdir /code/vfb_rest/vfb_rest/vfb
-#RUN mv /code/VFB_neo4j/src/* /code/vfb_rest/vfb_rest/vfb
+RUN mv /tmp/VFB_neo4j/src/* /code/vfb
 
-RUN ls -l /code/vfb_curation_api
+RUN ls -l /code && echo "Hello3"
 RUN cd /code && python3 setup.py develop
 
 ENTRYPOINT bash -c "cd /code; python3 vfb_curation_api/app.py"
-#&& python manage.py loaddata users

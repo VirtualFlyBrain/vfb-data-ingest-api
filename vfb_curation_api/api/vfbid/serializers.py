@@ -1,16 +1,6 @@
 from flask_restplus import fields
 from vfb_curation_api.api.restplus import api
 
-dataset = api.model('Dataset', {
-    'id': fields.Integer(readOnly=True, description='The unique VFB identifier for this dataset. Will be set automatically.'),
-    'orcid': fields.String(required=True, description='Category name'),
-    'project': fields.String(required=True, description='Category name'),
-    'short_name': fields.String(required=True, description='Short id for dataset. No special characters or spaces.'),
-    'title': fields.String(required=True, description='Human-readable name for dataset.'),
-    'publication': fields.String(required=False, description='Associated publication (optional).'),
-    'source_data': fields.String(required=False, description='URL to dataset (optional).'),
-})
-
 pagination = api.model('A page of results', {
     'page': fields.Integer(description='Number of this page of results'),
     'pages': fields.Integer(description='Total number of pages of results'),
@@ -18,13 +8,26 @@ pagination = api.model('A page of results', {
     'total': fields.Integer(description='Total number of results'),
 })
 
-page_of_datasets = api.inherit('Page of datsets', pagination, {
+dataset = api.model('Dataset', {
+    'id': fields.String(readOnly=True, description='The unique VFB identifier for this dataset. Will be set automatically.'),
+    'short_name': fields.String(required=True, description='Short id for dataset. No special characters or spaces.'),
+    'title': fields.String(required=True, description='Human-readable name for dataset.'),
+    'publication': fields.String(required=False, description='Associated publication (optional).'),
+    'source_data': fields.String(required=False, description='URL to dataset (optional).'),
+})
+
+list_of_datasets = api.model('DatasetList',  {
+    'datasets': fields.List(fields.Nested(dataset))
+})
+
+page_of_datasets = api.inherit('Page of datasets', pagination, {
     'items': fields.List(fields.Nested(dataset))
 })
 
-neuron = api.model('Blog category', {
+
+neuron = api.model('Neuron', {
     'id': fields.String(readOnly=True, description='The unique VFB identifier for this neuron.'),
-    'orcid': fields.String(required=True, description='Category name'),
+    'orcid': fields.String(required=True, description='The ORCID of the user'),
     'project': fields.String(required=True, description='Category name'),
     'primary_name': fields.String(required=True, description='Category name'),
     'dataset_id': fields.String(required=True, description='Category name'),
@@ -38,6 +41,26 @@ neuron = api.model('Blog category', {
     'imaging_type': fields.String(required=True, description='Category name'),
 })
 
-neurons_for_dataset = api.inherit('Neurons for project', dataset, {
-    'posts': fields.List(fields.Nested(neuron))
+list_of_neurons = api.model( 'NeuronList',  {
+    'neurons': fields.List(fields.Nested(neuron))
+})
+
+page_of_neurons = api.inherit('Page of datasets', pagination, {
+    'items': fields.List(fields.Nested(dataset))
+})
+
+project = api.model('Project', {
+    'id': fields.String(readOnly=True, description='The unique identifier for this project.'),
+})
+
+list_of_projects = api.model('ProjectList',   {
+    'projects': fields.List(fields.Nested(project))
+})
+
+page_of_projects = api.inherit('Page of projects', pagination, {
+    'items': fields.List(fields.Nested(dataset))
+})
+
+user = api.model('User', {
+    'id': fields.String(readOnly=True, description='The unique identifier for this user.'),
 })
