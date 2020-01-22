@@ -5,25 +5,24 @@ ENV KBuser=neo4j
 ENV KBpassword=password
 ENV LOAD_TEST_DATA=True
 
-RUN mkdir /code
-ADD requirements.txt /code
-ADD run.sh /code
-ADD logging.conf /code
+RUN mkdir /code /code/vfb_curation_api/
+ADD requirements.txt run.sh setup.py logging.conf /code/
+
 RUN chmod 777 /code/run.sh
 RUN pip install -r /code/requirements.txt
-ADD vfb_curation_api/ /code/vfb_curation_api
-ADD setup.py /code
+ADD vfb_curation_api/database /code/vfb_curation_api/database
+ADD vfb_curation_api/api /code/vfb_curation_api/api
+ADD vfb_curation_api/app.py vfb_curation_api/db.sqlite vfb_curation_api/settings.py /code/vfb_curation_api/
 WORKDIR /code
 
 RUN echo "Installing VFB neo4j tools" && \
 cd /tmp && \
 git clone --quiet https://github.com/VirtualFlyBrain/VFB_neo4j.git
 
-RUN mkdir /code/vfb
+RUN mkdir -p /code/vfb_curation_api/vfb && \
+mv /tmp/VFB_neo4j/src/* /code/vfb_curation_api/vfb
 
-RUN mv /tmp/VFB_neo4j/src/* /code/vfb
-
-RUN ls -l /code && echo "Hello3"
 RUN cd /code && python3 setup.py develop
+RUN ls -l /code && ls -l /code/vfb_curation_api && ls -l /code/vfb_curation_api/vfb
 
 ENTRYPOINT bash -c "cd /code; python3 vfb_curation_api/app.py"
