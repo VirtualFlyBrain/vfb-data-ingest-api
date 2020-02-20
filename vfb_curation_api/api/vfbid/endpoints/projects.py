@@ -1,7 +1,7 @@
 import logging
 
 from flask_restplus import Resource, reqparse
-from vfb_curation_api.api.vfbid.serializers import list_of_projects
+from vfb_curation_api.api.vfbid.serializers import project
 from vfb_curation_api.api.vfbid.business import valid_user
 from vfb_curation_api.api.restplus import api
 from vfb_curation_api.database.repository import db
@@ -18,7 +18,7 @@ ns = api.namespace('projects', description='Operations related to lists of proje
 @api.param('orcid', 'Your ORCID', required=True)
 class ProjectList(Resource):
 
-    @api.marshal_with(list_of_projects)
+    @api.marshal_with(project)
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('apikey', type=str, required=True)
@@ -27,5 +27,8 @@ class ProjectList(Resource):
         apikey = args['apikey']
         orcid = args['orcid']
         if valid_user(apikey, orcid):
-            return db.get_all_projects(orcid)
+            m = db.get_all_projects(orcid)
+            print("OUT::::::::")
+            print(str(m))
+            return m
         return "{ error: 'Invalid API Key' }"

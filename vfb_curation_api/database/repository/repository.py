@@ -3,10 +3,9 @@ from vfb_curation_api.database.models import Neuron, Dataset, Project, User
 import os
 import re
 import base36
-import sys
 import json
+import requests
 from vfb_curation_api.vfb.uk.ac.ebi.vfb.neo4j.neo4j_tools import neo4j_connect
-
 
 class VFBKB():
     def __init__(self):
@@ -15,6 +14,11 @@ class VFBKB():
         self.iri_base = "http://virtualflybrain.org/reports/VFB_"
         self.max_base36 = 1679615  # Corresponds to the base36 value of ZZZZZZ
         self.db_client = "vfb"
+        self.client_id = os.environ['CLIENT_ID_AUTHORISATION']
+        self.client_secret = os.environ['CLIENT_SECRET_AUTHORISATION']
+        self.redirect_uri = os.environ['REDIRECT_URI_AUTHORISATION']
+        self.authorisation_token_endpoint = os.environ['ENDPOINT_AUTHORISATION_TOKEN']
+
 
     ######################
     #### Core methods ####
@@ -59,12 +63,16 @@ class VFBKB():
         print("DATAIN: "+str(data_in))
         data = []
         for d_in in data_in:
+            print(d_in)
             columns = d_in['columns']
-            d = dict()
+            print(columns)
             for rec in d_in['data']:
-                for i in range(len(rec['row'])):
+                d = dict()
+                print(rec)
+                for i in range(len(columns)):
+                    print(i)
                     d[columns[i]]=rec['row'][i]
-            data.append(d)
+                data.append(d)
         print("DATAOUT: " + str(data))
         return data
 
@@ -96,7 +104,21 @@ class VFBKB():
         else:
             raise DatabaseNotInitialisedError("Database not initialised!")
 
-
+    def authenticate(self, code, redirect_uri):
+        data = {'client_id': self.client_id,
+                'client_secret': self.client_secret,
+                'grant_type': 'authorization_code',
+                'code': "{}".format(code),
+                'redirect_uri': redirect_uri }
+        print(data)
+        # sending post request and saving response as response object
+        r = requests.post(url=self.authorisation_token_endpoint, data=data)
+        print(r.text)
+        d = json.loads(r.text)
+        print(d['orcid'])
+        # {"access_token","token_type","refresh_token","expires_in","scope","name":"Nicolas Matentzoglu","orcid":"0000-0002-7356-1779"}
+        orcid = "https://orcid.org/{}".format(d['orcid'])
+        return self.get_user(orcid)
 
     ################################
     #### Data retrieval ############
@@ -132,11 +154,14 @@ class VFBKB():
         return None
 
     def get_neuron(self, id, orcid):
-        q = "MATCH (n:Individual {label:'%s'}) RETURN n.label as primary_name" % id
+        q = "MATCH (p:Person {iri:'%s'})-[:has_admin_permissions]->(n:Project)"
+        q = q + " MATCH (n)<-[:has_associated_project]-(d:DataSet)"
+        q = q + " MATCH (i  {iri:'%s'})-[:has_reference]->(d) RETURN i.iri as id, i.short_name as primary_name, n.iri as projectid"
+        q = q % (orcid, id)
         print(q)
         results = self.query(q=q)
         if len(results) == 1:
-            return Neuron(id=results[0]['id'])
+            return Neuron(id=results[0]['id'],primary_name=results[0]['primary_name'])
 
     def get_project(self, id, orcid):
         q = "MATCH (n:project {iri:'%s'}) RETURN n.iri as iri" % id
@@ -145,23 +170,28 @@ class VFBKB():
         return Project(id=results[0]['iri'])
 
     def get_user(self, orcid):
-        q = "MATCH (n:Person {iri:'%s'}) RETURN n.iri as id, n.label as primary_name" % id
+        q = "MATCH (n:Person {iri:'%s'}) RETURN n.iri as id, n.label as primary_name, n.apikey as apikey" % orcid
         print(q)
         results = self.query(q=q)
-        return User(results[0]['id'])
+        if len(results) == 1:
+            print(results[0])
+            return User(results[0]['id'], results[0]['primary_name'], results[0]['apikey'])
+        raise InvalidUserException("User with orcid id {} does not exist.".format(orcid))
+
 
     def get_all_datasets(self,projectid, orcid):
-        q = "MATCH (n:DataSet) RETURN n.iri as id, n.short_form as primary_name, n.label as title LIMIT 10"
+        q = "MATCH (p:Person {iri:'%s'})-[:has_admin_permissions]->(n:Project {iri:'%s'}) MATCH (n)<-[:has_associated_project]-(d:DataSet) RETURN d.iri as id, d.label as title, d.short_form as short_name" % (orcid, projectid)
         print(q)
         results = self.query(q=q)
         datasets = []
         for row in results:
-            datasets.append(Dataset(id=row['id'], short_name=row['primary_name'], title=row['title']))
+            print(row)
+            datasets.append(Dataset(id=row['id'], short_name=row['short_name'], title=row['title']))
         print(datasets)
         return datasets
 
     def get_all_projects(self,orcid):
-        q = "MATCH (n:Project) RETURN n.iri as id LIMIT 10"
+        q = "MATCH (p:Person {iri:'%s'})-[:has_admin_permissions]-(n:Project) RETURN n.iri as id" % orcid
         print(q)
         results = self.query(q=q)
         projects = []
@@ -171,12 +201,18 @@ class VFBKB():
         return projects
 
     def get_all_neurons(self, datasetid, orcid):
-        q = "MATCH (n:Individual) RETURN n.iri as id LIMIT 10"
+        q = "MATCH (p:Person {iri:'%s'})-[:has_admin_permissions]->(n:Project)"
+        q = q + " MATCH (n)<-[:has_associated_project]-(d:DataSet {iri:'%s'})"
+        q = q + " MATCH (i)-[:has_reference]->(d) RETURN i.iri as id, i.short_name as primary_name, n.iri as projectid"
+        q = q % (orcid, datasetid)
         print(q)
         results = self.query(q=q)
         neurons = []
         for row in results:
-            neurons.append(Neuron(id=row['id']))
+            n = Neuron(primary_name=row['primary_name'], id=row['id'])
+            n.set_dataset_id(datasetid)
+            n.set_project_id(row['projectid'])
+            neurons.append(n)
         print(neurons)
         return neurons
 
@@ -218,7 +254,7 @@ class VFBKB():
     def create_neuron_db(self, Neuron, datasetid, orcid):
         pro = self.has_dataset_write_permission(datasetid, orcid)
         if pro:
-            q = "MATCH (n:Dataset {projectid:'%s'})<-[:has_associated_project]-(i:Individual) RETURN i.iri" % project
+            q = "MATCH (n:Dataset {datasetid:'%s'})<-[:has_associated_project]-(i:Individual) RETURN i.iri" % datasetid
             print(q)
             results = self.query(q=q)
             iri_base_project = self.iri_base + project
@@ -292,3 +328,7 @@ class ProjectIDSpaceExhaustedError(Exception):
 
 class DatabaseNotInitialisedError(Exception):
     pass
+
+class InvalidUserException(Exception):
+    def __init__(self, message):
+        self.message = message

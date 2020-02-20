@@ -44,19 +44,7 @@ def initialize_app(flask_app):
     flask_app.register_blueprint(blueprint)
 
 
-#def setting_environment_variables():
-#    print("SETTTTTTIIINNNNG ENVIRONMENT PLEASE KILL ME.")
-#    print("SETTTTTTIIINNNNG ENVIRONMENT PLEASE KILL ME.")
-#    print("SETTTTTTIIINNNNG ENVIRONMENT PLEASE KILL ME.")
-#    print("SETTTTTTIIINNNNG ENVIRONMENT PLEASE KILL ME.")
-#    os.environ["KBserver"] = "http://localhost:7474"
-#    os.environ["KBuser"] = "neo4j"
-#    os.environ["KBpassword"] = "neo"
-#    os.environ["LOAD_TEST_DATA"] = "True"
-
-
 def main():
-    #setting_environment_variables()
     initialize_app(app)
     log.info('>>>>> Starting development server at http://{}/api/ <<<<<'.format(app.config['SERVER_NAME']))
     app.run(host='0.0.0.0', debug=settings.FLASK_DEBUG)

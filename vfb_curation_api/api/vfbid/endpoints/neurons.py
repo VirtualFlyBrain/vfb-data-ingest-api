@@ -1,7 +1,7 @@
 import logging
 
 from flask_restplus import Resource, reqparse
-from vfb_curation_api.api.vfbid.serializers import list_of_neurons
+from vfb_curation_api.api.vfbid.serializers import neuron
 from vfb_curation_api.api.vfbid.business import valid_user
 from vfb_curation_api.api.restplus import api
 from vfb_curation_api.database.repository import db
@@ -19,7 +19,7 @@ ns = api.namespace('neurons', description='Operations related to lists of neuron
 @api.param('datasetid', 'Your ORCID', required=True)
 class NeuronList(Resource):
 
-    @api.marshal_with(list_of_neurons)
+    @api.marshal_with(neuron)
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('apikey', type=str, required=True)
@@ -30,5 +30,5 @@ class NeuronList(Resource):
         datasetid = args['datasetid']
         orcid = args['orcid']
         if valid_user(apikey, orcid):
-            return db.get_all_neurons(datasetid)
+            return db.get_all_neurons(orcid=orcid,datasetid=datasetid)
         return "{ error: 'Invalid API Key' }"

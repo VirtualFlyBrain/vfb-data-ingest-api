@@ -4,6 +4,14 @@ ENV KBserver=http://localhost:7474
 ENV KBuser=neo4j
 ENV KBpassword=password
 ENV LOAD_TEST_DATA=True
+ENV REDIRECT_LOGIN="http://localhost:8080/dataingest-ui/user"
+ENV CLIENT_SECRET="UNKNOWN"
+ENV CLIENT_ID="APP-ENQTIY7Z904S6O1W"
+ENV CLIENT_ID_AUTHORISATION = ""
+ENV CLIENT_SECRET_AUTHORISATION = ""
+ENV REDIRECT_URI_AUTHORISATION = ""
+ENV ENDPOINT_AUTHORISATION_TOKEN = ""
+
 
 RUN mkdir /code /code/vfb_curation_api/
 ADD requirements.txt run.sh setup.py logging.conf /code/

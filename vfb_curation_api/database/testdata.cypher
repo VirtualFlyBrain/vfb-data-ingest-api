@@ -1,7 +1,8 @@
 MERGE (n1:Project {iri:'http://virtualflybrain.org/project/ABCD'})
-MERGE (n2:Project {iri:'http://virtualflybrain.org/project/'})
-MERGE (p1:Person {iri:'https://orcid.org/1234', apikey: 'xyz'})
-MERGE (p2:Person {iri:'https://orcid.org/4321', apikey: 'wyz'})
+MERGE (n2:Project {iri:'http://virtualflybrain.org/project/BCDE'})
+MERGE (n3:Project {iri:'http://virtualflybrain.org/project/CDEF'})
+MERGE (p1:Person {iri:'https://orcid.org/0000-0002-7356-1779', apikey: 'xyz', label: "Nico"})
+MERGE (p2:Person {iri:'https://orcid.org/4321', apikey: 'wyz', label: "Terminator"})
 MERGE (d1:DataSet {iri:'http://virtualflybrain.org/data/Zoglu2020', short_form:'Zoglu2020', label:'ZOG20', production: false})
 MERGE (d2:DataSet {iri:'http://virtualflybrain.org/data/Zoglu2030', short_form:'Zoglu2030', label:'ZOG30', production: false})
 MERGE (d3:DataSet {iri:'http://virtualflybrain.org/data/Zoglu2040', short_form:'Zoglu2040', label:'ZOG40', production: false})
@@ -13,6 +14,7 @@ MERGE (i4:Individual {iri:'http://virtualflybrain.org/reports/VFB_0000DCBA', sho
 
 MERGE (n1)<-[:has_admin_permissions]-(p1)
 MERGE (n2)<-[:has_admin_permissions]-(p2)
+MERGE (n3)<-[:has_admin_permissions]-(p1)
 
 MERGE (n1)<-[:has_associated_project]-(d1)
 MERGE (n1)<-[:has_associated_project]-(d2)

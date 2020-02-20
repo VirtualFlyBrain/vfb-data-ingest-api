@@ -7,26 +7,40 @@ class Dataset():
         self.title = title
         self.publication = publication
         self.source_data = source_data
+        self.description = ""
+        self.license = ""
+        self.project = ""
 
     def __repr__(self):
         return '<Dataset %r>' % self.title
 
 
 class Neuron():
-    def __init__(self, primary_name):
+    def __init__(self, primary_name, id):
         self.primary_name = primary_name
-        self.dataset_id = ""
+        self.id = id
+        self.dataset_id = []
+        self.project = ""
         self.type_specimen = ""
         self.alternative_names = []
-        self.external_identifiers = []
+        self.external_identifiers = [] # { GO: 001 }
         self.classification = ""
         self.classification_comment = ""
         self.url_skeleton_id = ""
         self.template_id = ""
+        self.filename = ""
         self.imaging_type = ""
+        self.driver_line = []
+        self.neuropils = []
+        self.input_neuropils = []
+        self.output_neuropils = []
+
 
     def set_dataset_id(self, dataset_id):
         self.dataset_id = dataset_id
+
+    def set_project_id(self, project_id):
+        self.project = project_id
 
     def set_type_specimen(self, type_specimen):
         self.type_specimen = type_specimen
@@ -56,20 +70,40 @@ class Neuron():
         self.imaging_type = imaging_type
 
     def __repr__(self):
-        return '<Neuron %r>' % self.name
+        return '<Neuron %r>' % self.primary_name
 
 
 class Project():
     def __init__(self, id):
         self.id = id
+        self.primary_name = ""
+        self.description = ""
 
     def __repr__(self):
         return '<Project %r>' % self.id
 
 
 class User():
-    def __init__(self, id):
-        self.id = id
+    def __init__(self, orcid, primary_name, apikey):
+        self.orcid = orcid
+        self.primary_name = primary_name
+        self.apikey = apikey
+        self.manages_projects = []
 
     def __repr__(self):
-        return '<Project %r>' % self.id
+        return '<User %r>' % self.id
+
+class NeuronType:
+    def __init__(self, id):
+        self.id = id
+        self.synonyms = []
+        self.parent = ""
+        #self.supertype = "" Why neeed that?
+        self.name = ""
+        self.exemplar = ""
+
+class Site:
+    def __init__(self, id):
+        self.id = id
+        self.url = ""
+        self.short_form = ""

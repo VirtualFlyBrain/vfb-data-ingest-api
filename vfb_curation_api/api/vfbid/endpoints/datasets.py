@@ -1,7 +1,7 @@
 import logging
 
 from flask_restplus import Resource, reqparse
-from vfb_curation_api.api.vfbid.serializers import list_of_datasets
+from vfb_curation_api.api.vfbid.serializers import dataset
 from vfb_curation_api.api.vfbid.business import valid_user
 from vfb_curation_api.api.restplus import api
 from vfb_curation_api.database.repository import db
@@ -19,7 +19,7 @@ ns = api.namespace('datasets', description='Operations related to lists of datas
 @api.param('projectid', 'The VFB Project ID', required=True)
 class DatasetList(Resource):
 
-    @api.marshal_with(list_of_datasets)
+    @api.marshal_with(dataset)
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('apikey', type=str, required=True)

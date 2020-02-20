@@ -63,4 +63,6 @@ page_of_projects = api.inherit('Page of projects', pagination, {
 
 user = api.model('User', {
     'id': fields.String(readOnly=True, description='The unique identifier for this user.'),
+    'primary_name': fields.String(readOnly=True, description='The name of this user.'),
+    'apikey': fields.String(readOnly=True, description='The current API key for this user.'),
 })
