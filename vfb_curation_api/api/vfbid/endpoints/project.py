@@ -14,6 +14,7 @@ ns = api.namespace('project', description='Operations related to neurons')
 @ns.route('/')
 @api.param('apikey','Your API Key', required=True)
 @api.param('orcid', 'Your ORCID', required=True)
+@api.param('projectid', 'The four letter ID of the project', required=True)
 class ProjectResource(Resource):
     @api.response(201, 'Neuron successfully created.')
     @api.expect(project)

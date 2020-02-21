@@ -18,11 +18,16 @@ dataset = api.model('Dataset', {
     'license': fields.String(required=False, description='License of dataset (optional).'),
 })
 
+datasetid = api.model('DatasetID', {
+    'id': fields.String(readOnly=True, description='The unique VFB identifier for this dataset.',skip_none=True),
+})
+
+
 neuron = api.model('Neuron', {
     'id': fields.String(readOnly=True, description='The unique VFB identifier for this neuron.'),
     'orcid': fields.String(required=True, description='The ORCID of the user'),
     'primary_name': fields.String(required=True, description='Primary name of the neuron.'),
-    'dataset_id': fields.List(fields.String(required=True), description='List of IDs of datasets this Neuron image belongs to.'),
+    'datasets': fields.List(fields.String(required=False), description='Dataset IDs.'),
     'type_specimen': fields.String(required=False, description='Type specimen of the neuron (optional)'),
     'alternative_names': fields.List(fields.String(required=False), description='List of alternative names / synonyms.'),
     'external_identifiers': fields.List(fields.String(required=True), description='List of external identifiers.'),
@@ -36,6 +41,8 @@ neuron = api.model('Neuron', {
     'input_neuropils': fields.List(fields.String(required=False), description='Input neuropils'),
     'output_neuropils': fields.List(fields.String(required=False), description='Output neuropils'),
 })
+
+
 
 # list_of_neurons = api.model( 'NeuronList',  {
 #     'neurons': fields.List(fields.Nested(neuron))

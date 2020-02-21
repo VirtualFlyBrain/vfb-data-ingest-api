@@ -124,54 +124,91 @@ class VFBKB():
     #### Data retrieval ############
     ################################
 
-    def has_project_write_permission(self, project,orcid):
-        q = "MATCH (n:Project {projectid:'%s'})<-[has_admin_permissions]-(a:Person {orcid: '%s'}) RETURN n" % (project, orcid)
-        print(q)
-        results = self.query(q=q)
-        return len(results) >= 1
+    # Labels:
+    # n: project
+    # p: person
+    # d: dataset
+    # i: neuron
+
+
+    def valid_user(self, apikey, orcid):
+        if self.get_user(orcid, apikey):
+            return True
+        return False
+
+    def _get_project_permission_clause(self, orcid, project=None):
+        q = "MATCH (n:Project "
+        if project:
+            q = q + "{iri:'http://virtualflybrain.org/project/%s'}" % project
+        q = q +")<-[:has_admin_permissions]-(p:Person {iri: '%s'}) " % orcid
+        return q
+
+    def _get_project_return_clause(self):
+        return " RETURN n.iri as id"
+
+    def _get_dataset_permission_clause(self, orcid, datasetid=None,project=None):
+        q = self._get_project_permission_clause(orcid,project)
+        q = q + "MATCH (n)<-[:has_associated_project]-(d:DataSet "
+        if datasetid:
+            q = q + "{iri: '%s'}" % datasetid
+        q = q+ ") ";
+        return q
+
+    def _get_dataset_return_clause(self):
+        return " RETURN d.iri as id, d.short_form as short_form, d.label as title"
+
+    def _get_neuron_permission_clause(self, orcid, neuronid=None, datasetid=None,project=None):
+        q = self._get_dataset_permission_clause(orcid,datasetid,project)
+        q = q + "MATCH (i  "
+        if neuronid:
+            q = q + "{iri: '%s'}" % neuronid
+        q = q+ ")-[:has_reference]->(d) "
+        return q
+
+    def _get_neuron_return_clause(self):
+        return " RETURN i.iri as id, i.short_name as primary_name, n.iri as projectid"
+
+    def has_project_write_permission(self, project, orcid):
+        if self.get_project(project,orcid):
+            return True
+        return False
 
     def has_dataset_write_permission(self, datasetid, orcid):
-        q = "MATCH (n:Project {projectid:'%s'})<-[has_admin_permissions]-(a:Person {orcid: '%s'}) RETURN n" % (
-        datasetid, orcid)
-        print(q)
-        results = self.query(q=q)
-        return len(results) >= 1
+        if self.get_dataset(datasetid, orcid):
+            return True
+        return False
 
-    def valid_user(self, apikey,orcid):
-        q = "MATCH (a:Person {iri: '%s', apikey: '%s'}) RETURN a" % (orcid, apikey)
-        print(q)
-        print("#####################valid_user:start####################")
-        results = self.query(q=q)
-        print("#####################valid_user:end####################")
-        return len(results) >= 1
-
-    def get_dataset(self, id, orcid):
-        q = "MATCH (n:DataSet {iri:'%s'}) RETURN n.iri as id, n.short_form as primary_name, n.label as title" % id
-        print(q)
+    def get_project(self, id, orcid):
+        q = self._get_project_permission_clause(orcid,id) + self._get_project_return_clause()
         results = self.query(q=q)
         if len(results) == 1:
-            return Dataset(id=results[0]['id'], short_name=results[0]['primary_name'], title=results[0]['title'])
+            p = Project(id=results[0]['id'])
+            return p
+        return None
+
+
+    def get_dataset(self, id, orcid):
+        q = self._get_dataset_permission_clause(orcid, id) + self._get_dataset_return_clause()
+        results = self.query(q=q)
+        if len(results) == 1:
+            d = Dataset(id=results[0]['id'], short_name=results[0]['short_form'], title=results[0]['title'])
+            return d
         return None
 
     def get_neuron(self, id, orcid):
-        q = "MATCH (p:Person {iri:'%s'})-[:has_admin_permissions]->(n:Project)"
-        q = q + " MATCH (n)<-[:has_associated_project]-(d:DataSet)"
-        q = q + " MATCH (i  {iri:'%s'})-[:has_reference]->(d) RETURN i.iri as id, i.short_name as primary_name, n.iri as projectid"
-        q = q % (orcid, id)
-        print(q)
+        q = self._get_neuron_permission_clause(orcid,id)
+        q = q + " RETURN i.iri as id, i.short_name as primary_name, n.iri as projectid"
         results = self.query(q=q)
         if len(results) == 1:
-            return Neuron(id=results[0]['id'],primary_name=results[0]['primary_name'])
+            n = Neuron(id=results[0]['id'],primary_name=results[0]['primary_name'])
+            return n
+        return None
 
-    def get_project(self, id, orcid):
-        q = "MATCH (n:project {iri:'%s'}) RETURN n.iri as iri" % id
-        print(q)
-        results = self.query(q=q)
-        return Project(id=results[0]['iri'])
-
-    def get_user(self, orcid):
-        q = "MATCH (n:Person {iri:'%s'}) RETURN n.iri as id, n.label as primary_name, n.apikey as apikey" % orcid
-        print(q)
+    def get_user(self, orcid, apikey=None):
+        q = "MATCH (p:Person {iri:'%s'" % orcid
+        if apikey:
+            q = q + ", apikey: '%s'" % apikey
+        q = q + "}) RETURN p.iri as id, p.label as primary_name, p.apikey as apikey"
         results = self.query(q=q)
         if len(results) == 1:
             print(results[0])
@@ -180,40 +217,31 @@ class VFBKB():
 
 
     def get_all_datasets(self,projectid, orcid):
-        q = "MATCH (p:Person {iri:'%s'})-[:has_admin_permissions]->(n:Project {iri:'%s'}) MATCH (n)<-[:has_associated_project]-(d:DataSet) RETURN d.iri as id, d.label as title, d.short_form as short_name" % (orcid, projectid)
-        print(q)
+        q = self._get_dataset_permission_clause(orcid=orcid, project=projectid) + self._get_dataset_return_clause()
         results = self.query(q=q)
         datasets = []
         for row in results:
-            print(row)
-            datasets.append(Dataset(id=row['id'], short_name=row['short_name'], title=row['title']))
-        print(datasets)
+            #print(row)
+            datasets.append(Dataset(id=row['id'], short_name=row['short_form'], title=row['title']))
         return datasets
 
     def get_all_projects(self,orcid):
-        q = "MATCH (p:Person {iri:'%s'})-[:has_admin_permissions]-(n:Project) RETURN n.iri as id" % orcid
-        print(q)
+        q = self._get_project_permission_clause(orcid=orcid) + self._get_project_return_clause()
         results = self.query(q=q)
         projects = []
         for row in results:
             projects.append(Project(id=row['id']))
-        print(projects)
         return projects
 
     def get_all_neurons(self, datasetid, orcid):
-        q = "MATCH (p:Person {iri:'%s'})-[:has_admin_permissions]->(n:Project)"
-        q = q + " MATCH (n)<-[:has_associated_project]-(d:DataSet {iri:'%s'})"
-        q = q + " MATCH (i)-[:has_reference]->(d) RETURN i.iri as id, i.short_name as primary_name, n.iri as projectid"
-        q = q % (orcid, datasetid)
-        print(q)
+        q = self._get_neuron_permission_clause(orcid=orcid) + self._get_neuron_return_clause()
         results = self.query(q=q)
         neurons = []
         for row in results:
             n = Neuron(primary_name=row['primary_name'], id=row['id'])
-            n.set_dataset_id(datasetid)
+            n.set_datasets([datasetid])
             n.set_project_id(row['projectid'])
             neurons.append(n)
-        print(neurons)
         return neurons
 
     ################################

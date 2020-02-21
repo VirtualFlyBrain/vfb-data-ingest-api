@@ -1,15 +1,32 @@
 from random import randint
 
 class Dataset():
-    def __init__(self, id, short_name, title, publication="", source_data=""):
+    def __init__(self, id, short_name, title):
         self.id = id
         self.short_name = short_name
         self.title = title
-        self.publication = publication
-        self.source_data = source_data
+        self.publication = ""
+        self.source_data = ""
         self.description = ""
         self.license = ""
         self.project = ""
+
+        def set_publication(self, publication):
+            self.publication = publication
+
+        def set_source_data(self, source_data):
+            self.source_data = source_data
+
+        def set_description(self, description):
+            self.description = description
+
+        def set_license(self, license):
+            self.license = license
+
+        def set_project(self, project):
+            self.project = project
+
+
 
     def __repr__(self):
         return '<Dataset %r>' % self.title
@@ -19,7 +36,7 @@ class Neuron():
     def __init__(self, primary_name, id):
         self.primary_name = primary_name
         self.id = id
-        self.dataset_id = []
+        self.datasets = []
         #self.project = ""
         self.type_specimen = ""
         self.alternative_names = []
@@ -36,8 +53,8 @@ class Neuron():
         self.output_neuropils = []
 
 
-    def set_dataset_id(self, dataset_id):
-        self.dataset_id = dataset_id
+    def set_datasets(self, datasets):
+        self.datasets = datasets
 
     def set_project_id(self, project_id):
         self.project = project_id

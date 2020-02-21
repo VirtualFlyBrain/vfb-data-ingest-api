@@ -19,7 +19,7 @@ ns = api.namespace('datasets', description='Operations related to lists of datas
 @api.param('projectid', 'The VFB Project ID', required=True)
 class DatasetList(Resource):
 
-    @api.marshal_with(dataset)
+    @api.marshal_with(dataset,envelope="datasets")
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('apikey', type=str, required=True)

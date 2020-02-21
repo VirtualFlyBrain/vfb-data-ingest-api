@@ -28,7 +28,5 @@ class ProjectList(Resource):
         orcid = args['orcid']
         if valid_user(apikey, orcid):
             m = db.get_all_projects(orcid)
-            print("OUT::::::::")
-            print(str(m))
             return m
         return "{ error: 'Invalid API Key' }"

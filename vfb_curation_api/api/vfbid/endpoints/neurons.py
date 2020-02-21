@@ -16,10 +16,10 @@ ns = api.namespace('neurons', description='Operations related to lists of neuron
 @api.response(404, 'No neurons found.')
 @api.param('apikey', 'Your API Key', required=True)
 @api.param('orcid', 'Your ORCID', required=True)
-@api.param('datasetid', 'Your ORCID', required=True)
+@api.param('datasetid', 'The ID of the dataset the neuron image belongs to.', required=True)
 class NeuronList(Resource):
 
-    @api.marshal_with(neuron)
+    @api.marshal_with(neuron, skip_none=True)
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('apikey', type=str, required=True)
