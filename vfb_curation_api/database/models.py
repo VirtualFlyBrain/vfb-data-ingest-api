@@ -20,13 +20,13 @@ class Neuron():
         self.primary_name = primary_name
         self.id = id
         self.dataset_id = []
-        self.project = ""
+        #self.project = ""
         self.type_specimen = ""
         self.alternative_names = []
         self.external_identifiers = [] # { GO: 001 }
         self.classification = ""
         self.classification_comment = ""
-        self.url_skeleton_id = ""
+        #self.url_skeleton_id = ""
         self.template_id = ""
         self.filename = ""
         self.imaging_type = ""
@@ -99,7 +99,7 @@ class NeuronType:
         self.synonyms = []
         self.parent = ""
         #self.supertype = "" Why neeed that?
-        self.name = ""
+        self.label = ""
         self.exemplar = ""
 
 class Site:
