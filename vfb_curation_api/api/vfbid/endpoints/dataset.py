@@ -20,15 +20,18 @@ class DatasetResource(Resource):
     @api.response(201, 'Dataset successfully created.')
     @api.expect(dataset)
     @api.marshal_with(dataset)
+    @api.param('projectid', 'The four letter ID of your Project.', required=True)
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('apikey', type=str, required=True)
         parser.add_argument('orcid', type=str, required=True)
+        parser.add_argument('projectid', type=str, required=True)
         args = parser.parse_args()
         apikey = args['apikey']
         orcid = args['orcid']
+        project = args['projectid']
         if valid_user(apikey, orcid):
-            datasetid = create_dataset(request.json, orcid)
+            datasetid = create_dataset(request.json, project, orcid)
             return db.get_dataset(datasetid, orcid), 201
         return "{ error: 'Invalid API Key' }"
 

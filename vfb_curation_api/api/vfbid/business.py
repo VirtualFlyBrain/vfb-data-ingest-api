@@ -1,14 +1,15 @@
 from vfb_curation_api.database.models import Neuron, Dataset, Project
 from vfb_curation_api.database.repository import db
 
-def create_dataset(data, orcid):
-    project = data.get('project')
+def create_dataset(data, project, orcid):
     short_name = data.get('short_name')
     title = data.get('title')
     publication = data.get('publication')
     source_data = data.get('source_data')
-    ds = Dataset(orcid, project, short_name, title, publication, source_data)
-    return db.create_dataset(ds, orcid)
+    ds = Dataset(orcid, short_name, title)
+    ds.set_publication(publication)
+    ds.set_source_data(source_data)
+    return db.create_dataset(ds, project, orcid)
 
 
 def create_neuron(data):

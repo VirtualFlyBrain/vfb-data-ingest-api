@@ -9,24 +9,18 @@ class Dataset():
         self.source_data = ""
         self.description = ""
         self.license = ""
-        self.project = ""
 
-        def set_publication(self, publication):
-            self.publication = publication
+    def set_publication(self, publication):
+        self.publication = publication
 
-        def set_source_data(self, source_data):
-            self.source_data = source_data
+    def set_source_data(self, source_data):
+        self.source_data = source_data
 
-        def set_description(self, description):
-            self.description = description
+    def set_description(self, description):
+        self.description = description
 
-        def set_license(self, license):
-            self.license = license
-
-        def set_project(self, project):
-            self.project = project
-
-
+    def set_license(self, license):
+        self.license = license
 
     def __repr__(self):
         return '<Dataset %r>' % self.title

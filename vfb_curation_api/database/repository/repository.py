@@ -6,11 +6,14 @@ import base36
 import json
 import requests
 from vfb_curation_api.vfb.uk.ac.ebi.vfb.neo4j.neo4j_tools import neo4j_connect
+from vfb_curation_api.vfb.uk.ac.ebi.vfb.neo4j.KB_tools import KB_pattern_writer
+from vfb_curation_api.vfb.uk.ac.ebi.vfb.neo4j.KB_tools import kb_owl_edge_writer
 
 class VFBKB():
     def __init__(self):
         self.iri_base = "http://virtualflybrain.org/data/"
         self.db = None
+        self.kb_owl_pattern_writer = None
         self.iri_base = "http://virtualflybrain.org/reports/VFB_"
         self.max_base36 = 1679615  # Corresponds to the base36 value of ZZZZZZ
         self.db_client = "vfb"
@@ -35,6 +38,8 @@ class VFBKB():
             try:
                 if self.db_client=="vfb":
                     self.db = neo4j_connect(self.kb, self.user, self.password)
+                    self.kb_owl_pattern_writer = KB_pattern_writer(self.kb, self.user, self.password)
+                    self.kb_owl_edge_writer = kb_owl_edge_writer(self.kb, self.user, self.password)
                 else:
                     self.db = GraphDatabase(self.kb, username=self.user, password=self.password)
                 self.prepare_database()
@@ -250,29 +255,11 @@ class VFBKB():
 
     def create_dataset(self, Dataset, project, orcid):
         if self.has_project_write_permission(project, orcid):
-            q = "MATCH (n:Project {projectid:'%s'})<-[:has_associated_project]-(i:DataSet) RETURN i.iri" % project
-            print(q)
-            results = self.query(q=q)
-            iris = [x[0].replace(self.iri_base, "") for x in results]
-            sn = re.sub('[^0-9a-zA-Z-_]+', '', Dataset.short_name)
-            if sn not in iris:
-                vfb_id = self.iri_base + sn
-                print(vfb_id)
-                q = "MATCH (n:Project {projectid:'%s'}) MERGE (n)<-[:has_associated_project]-(i:DataSet {iri:'%s', short_name:'%s', production: false" % (
-                project, vfb_id, sn)
-                if Dataset.source_data:
-                    q = q + ", dataset_link: '%s'" % Dataset.source_data
-                if Dataset.title:
-                    q = q + ", label: '%s'" % Dataset.title
-                if Dataset.publication:
-                    print("Dataset publications are not currently supported")
-                q = q + "})"
-                print(q)
-                self.query(q=q)
-                return vfb_id
+            if self.db_client=="vfb":
+                self.kb_owl_pattern_writer.add_dataSet(Dataset.title, Dataset.license, Dataset.short_name, pub=Dataset.publication,
+                        description=Dataset.description, dataset_spec_text='', site='')
             else:
-                raise DatasetWithSameNameExistsError(
-                    "The shortname for this dataset (" + sn + ") has already been taken. Please use another one!")
+                raise VFBError('Datasets cannot be added right now; please contact the VFB administrators.')
         else:
             raise IllegalProjectError(
                 'The project %s does not exist, or user with orcid %s does not have the required permissions. '
@@ -280,64 +267,29 @@ class VFBKB():
         return id
 
     def create_neuron_db(self, Neuron, datasetid, orcid):
-        pro = self.has_dataset_write_permission(datasetid, orcid)
-        if pro:
-            q = "MATCH (n:Dataset {datasetid:'%s'})<-[:has_associated_project]-(i:Individual) RETURN i.iri" % datasetid
-            print(q)
-            results = self.query(q=q)
-            iri_base_project = self.iri_base + project
-            iris = [base36.loads(x[0].replace(iri_base_project, "")) for x in results]
-            if not iris:
-                iris = [0]
-            id = max(iris) + 1
-            if id <= self.max_base36:
-                id = base36.dumps(id)
-                idstring = id.zfill(4)
-                id = project + str(idstring)
-                vfb_id = self.iri_base + id
-                print(vfb_id)
-                q = "MATCH (n:Project {projectid:'%s'}) MERGE (n)<-[:has_associated_project]-(i:Individual {iri:'%s', short_name:'VFB_%s', production: false" % (
-                project, vfb_id, id)
+        if self.has_dataset_write_permission(datasetid, orcid):
+            if self.db_client=="vfb":
+                self.kb_owl_pattern_writer.add_anatomy_image_set(datasetid,
+                              Neuron.imaging_type,
+                              Neuron.primary_name,
+                              start,
+                              Neuron.template_id,
+                              anatomical_type='',
+                              index=False,
+                              center=(),
+                              anatomy_attributes=None,
+                              dbxrefs=None,
+                              image_filename='',
+                              match_on='short_form',
+                              orcid = '',
+                              hard_fail=False)
 
-                if Neuron.primary_name:
-                    q = q + ", label: '%s'" % Neuron.primary_name
-                if Neuron.external_identifiers:
-                    ids = ','.join(Neuron.external_identifiers)
-                    q = q + ", xrefs: '%s'" % ids
-                if Neuron.alternative_names:
-                    altids = ','.join(Neuron.alternative_names)
-                    q = q + ", synonyms: '%s'" % altids
-                if Neuron.type_specimen:
-                    print("Neuron type specimens are not currently supported")
-                if Neuron.template_id:
-                    print("Templates are not currently supported")
-                if Neuron.imaging_type:
-                    print("Imaging types are not currently supported")
-                if Neuron.url_skeleton_id:
-                    print("Skeletons are not currently supported")
-                q = q + "})"
-                print(q)
-                self.query(q=q)
-
-                if Neuron.dataset_id:
-                    q = "MATCH (n:Individual {iri:'%s'}) MATCH (d:DataSet {iri:'%s'}) MERGE (n)-[:has_reference]-(d)" % (
-                    vfb_id, Neuron.dataset_id)
-                    self.query(q=q)
-                if Neuron.classification:
-                    q = "MATCH (n:Individual {iri:'%s'}) MATCH (d:Class {iri:'%s'}) MERGE (n)-[:INSTANCEOF]-(d)" % (
-                    vfb_id, Neuron.classification)
-                    if Neuron.classification_comment:
-                        comment = ":INSTANCEOF {comment: '%s'}" % Neuron.classification_comment
-                        q = q.replace(":INSTANCEOF", comment)
-                    self.query(q=q)
-                return vfb_id
+                self.kb_owl_edge_writer.add_anon_subClassOf_ax(s, r, o, edge_annotations=None, match_on="iri", safe_label_edge=False)
             else:
-                raise IllegalProjectError(
-                    "This projects (" + project + ") id space is exhausted. Please send an email to info@virtualflybrain.org to obtain a new one. ")
+                raise VFBError('Datasets cannot be added right now; please contact the VFB administrators.')
         else:
             raise IllegalProjectError(
-                'The project %s does not exist, or user with ORCID %s does not have the required permissions. '
-                'Please send an email to info@virtualflybrain.org to register your project.' % (project, Neuron.orcid))
+                'The project %s does not exist, or user with ORCID %s does not have the required permissions to add an image to it.' % (datasetid, orcid))
         return id
 
     def create_project_db(self, Project):
@@ -346,6 +298,9 @@ class VFBKB():
 
 
 class IllegalProjectError(Exception):
+    pass
+
+class VFBError(Exception):
     pass
 
 class DatasetWithSameNameExistsError(Exception):
