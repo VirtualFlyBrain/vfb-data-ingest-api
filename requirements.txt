@@ -3,5 +3,6 @@ Flask-SQLAlchemy==2.4.1
 neo4jrestclient==2.1.1
 base36==0.1.1
 flask==1.1.1
+Werkzeug==0.16.0
 psycopg2==2.8.4
 orcid==1.0.3
