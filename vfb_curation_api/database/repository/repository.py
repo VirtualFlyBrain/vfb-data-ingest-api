@@ -296,6 +296,10 @@ class VFBKB():
         raise IllegalProjectError(
             'Creating projects is currently not supported.')
 
+    def create_neuron_type_db(self, Project):
+        raise IllegalProjectError(
+            'Creating new neuron types is currently not supported.')
+
 
 class IllegalProjectError(Exception):
     pass

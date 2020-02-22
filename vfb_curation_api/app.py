@@ -6,6 +6,7 @@ from vfb_curation_api import settings
 from vfb_curation_api.api.vfbid.endpoints.datasets import ns as datasets_namespace
 from vfb_curation_api.api.vfbid.endpoints.dataset import ns as dataset_namespace
 from vfb_curation_api.api.vfbid.endpoints.neurons import ns as neurons_namespace
+from vfb_curation_api.api.vfbid.endpoints.neuron_type import ns as neuron_type_namespace
 from vfb_curation_api.api.vfbid.endpoints.neuron import ns as neuron_namespace
 from vfb_curation_api.api.vfbid.endpoints.project import ns as project_namespace
 from vfb_curation_api.api.vfbid.endpoints.projects import ns as projects_namespace
@@ -33,14 +34,15 @@ def initialize_app(flask_app):
     configure_app(flask_app)
     blueprint = Blueprint('api', __name__, url_prefix='/api')
     api.init_app(blueprint)
+    api.add_namespace(login_namespace)
+    api.add_namespace(user_namespace)
+    api.add_namespace(projects_namespace)
     api.add_namespace(datasets_namespace)
     api.add_namespace(neurons_namespace)
-    api.add_namespace(neuron_namespace)
-    api.add_namespace(dataset_namespace)
+    api.add_namespace(neuron_type_namespace)
     api.add_namespace(project_namespace)
-    api.add_namespace(projects_namespace)
-    api.add_namespace(user_namespace)
-    api.add_namespace(login_namespace)
+    api.add_namespace(dataset_namespace)
+    api.add_namespace(neuron_namespace)
     flask_app.register_blueprint(blueprint)
 
 

@@ -15,11 +15,11 @@ ns = api.namespace('user', description='Operations related to user')
 @api.param('apikey','Your API Key', required=True)
 @api.param('orcid', 'Your ORCID', required=True)
 class UserResource(Resource):
-    @api.response(201, 'User successfully created.')
-    @api.expect(user)
-    @api.marshal_with(user)
-    def post(self):
-        return "{ error: 'Not supported'}", 201
+    # @api.response(201, 'User successfully created.')
+    # @api.expect(user)
+    # @api.marshal_with(user)
+    # def post(self):
+    #     return "{ error: 'Not supported'}", 201
 
     @api.marshal_with(user)
     def get(self):

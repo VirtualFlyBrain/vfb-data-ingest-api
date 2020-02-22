@@ -1,4 +1,4 @@
-from vfb_curation_api.database.models import Neuron, Dataset, Project
+from vfb_curation_api.database.models import Neuron, Dataset, Project, NeuronType, Site
 from vfb_curation_api.database.repository import db
 
 def create_dataset(data, project, orcid):
@@ -42,6 +42,11 @@ def create_project(data):
     projectid = data.get('projectid')
     ds = Project(projectid)
     return db.create_project_db(ds)
+
+def create_neuron_type(data):
+    neuron_type_id = data.get('neuron_type_id')
+    ds = NeuronType(neuron_type_id)
+    return db.create_neuron_type_db(ds)
 
 
 def valid_user(apikey, orcid):

@@ -16,16 +16,16 @@ ns = api.namespace('project', description='Operations related to neurons')
 @api.param('orcid', 'Your ORCID', required=True)
 @api.param('projectid', 'The four letter ID of the project', required=True)
 class ProjectResource(Resource):
-    @api.response(201, 'Project successfully created.')
-    @api.expect(project)
-    @api.marshal_with(project)
-    def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('apikey', type=str, required=True)
-        parser.add_argument('projectid', type=str, required=True)
-        parser.add_argument('orcid', type=str, required=True)
-        pid = create_project(request.json)
-        return db.get_project(pid), 201
+    # @api.response(201, 'Project successfully created.')
+    # @api.expect(project)
+    # @api.marshal_with(project)
+    # def post(self):
+    #     parser = reqparse.RequestParser()
+    #     parser.add_argument('apikey', type=str, required=True)
+    #     parser.add_argument('projectid', type=str, required=True)
+    #     parser.add_argument('orcid', type=str, required=True)
+    #     pid = create_project(request.json)
+    #     return db.get_project(pid), 201
 
     @api.marshal_with(project)
     @api.response(404, 'Project not found.')
