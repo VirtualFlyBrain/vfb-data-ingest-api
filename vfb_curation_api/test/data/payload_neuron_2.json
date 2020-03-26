@@ -1,0 +1,45 @@
+{ "neurons": [{
+  "primary_name": "Neuron XYZ superspaced",
+  "datasetid": "Zoglu2020",
+  "alternative_names": [
+    "Neuron XYZ superspac",
+    "Neuron XY-Z sspac"
+  ],
+  "external_identifiers": [
+    {
+      "resource_id": "FlyBase",
+      "external_id": "1"
+    },
+    {
+      "resource_id": "FlyBrain_NDB",
+      "external_id": "12"
+    }
+  ],
+  "classification": "FBbt_00005106",
+  "classification_comment": "Standard classification in absence of a neuron type",
+  "template_id": "VFB_00017894",
+  "imaging_type": "computer graphic",
+  "filename": "test1.png"
+},{
+  "primary_name": "Neuron XYZ superspaced2",
+  "datasetid": "Zoglu2020",
+  "alternative_names": [
+    "Neuron XYZ superspac2",
+    "Neuron XY-Z sspac2"
+  ],
+  "external_identifiers": [
+    {
+      "resource_id": "FlyBase",
+      "external_id": "2"
+    },
+    {
+      "resource_id": "FlyBrain_NDB",
+      "external_id": "13"
+    }
+  ],
+  "classification": "FBbt_00005106",
+  "classification_comment": "Standard classification in absence of a neuron type",
+  "template_id": "VFB_00017894",
+  "imaging_type": "computer graphic",
+  "filename": "test2.png"
+}]}

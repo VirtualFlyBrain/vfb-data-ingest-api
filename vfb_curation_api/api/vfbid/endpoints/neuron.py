@@ -3,10 +3,11 @@ import logging
 from flask import request
 from flask_restplus import Resource
 from vfb_curation_api.api.vfbid.business import create_neuron, valid_user
-from vfb_curation_api.api.vfbid.serializers import neuron
+from vfb_curation_api.api.vfbid.serializers import neuron, list_of_neurons
 from vfb_curation_api.api.restplus import api
+from vfb_curation_api.api.vfbid.errorcodes import INVALID_APIKEY, UNKNOWNERROR
 from vfb_curation_api.database.repository import db
-from flask_restplus import reqparse
+from flask_restplus import reqparse, marshal
 
 log = logging.getLogger(__name__)
 
@@ -19,8 +20,7 @@ parser = reqparse.RequestParser()
 @api.param('orcid', 'Your ORCID', required=True)
 class NeuronResource(Resource):
     @api.response(201, 'Neuron successfully created.')
-    @api.expect(neuron)
-    @api.marshal_with(neuron)
+    @api.expect(list_of_neurons)
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('apikey', type=str, required=True)
@@ -28,10 +28,30 @@ class NeuronResource(Resource):
         args = parser.parse_args()
         apikey = args['apikey']
         orcid = args['orcid']
-        if valid_user(apikey, orcid):
-            nid = create_neuron(request.json)
-            return db.get_neuron(nid), 201
-        return "{ error: 'Invalid API Key' }"
+        out = dict()
+        try:
+            if valid_user(apikey, orcid):
+                nid = create_neuron(request.json, orcid)
+                if isinstance(nid,dict) and 'error' in nid:
+                    return nid
+                else:
+                    n = db.get_neuron(nid, orcid=orcid)
+                    out['neurons'] = marshal(n, neuron)
+                    return out, 201
+            else:
+                out['error'] = {
+                        "code": INVALID_APIKEY,
+                        "message": 'Invalid API Key',
+                    }
+            return out, 403
+        except Exception as e:
+            print(e)
+            out['error'] = {
+                "code": UNKNOWNERROR,
+                "message": str(type(e).__name__),
+            }
+        return out, 403
+
 
     @api.param('neuronid', 'Neuron id', required=True)
     @api.response(404, 'Dataset not found.')

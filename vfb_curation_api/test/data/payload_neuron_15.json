@@ -1,0 +1,155 @@
+{ "neurons": [{
+  "primary_name": "Neuron XYZ superspaced",
+  "datasetid": "Zoglu2020",
+  "alternative_names": [
+    "Neuron XYZ superspac",
+    "Neuron XY-Z sspac"
+  ],
+  "external_identifiers": [
+    {
+      "resource_id": "FlyBase",
+      "external_id": "1"
+    },
+    {
+      "resource_id": "FlyBrain_NDB",
+      "external_id": "12"
+    }
+  ],
+  "classification": "FBbt_00005106",
+  "classification_comment": "Standard classification in absence of a neuron type",
+  "template_id": "VFB_00017894",
+  "imaging_type": "computer graphic",
+  "filename": "test1.png"
+},{
+  "primary_name": "Neuron XYZ superspaced2",
+  "datasetid": "Zoglu2020",
+  "alternative_names": [
+    "Neuron XYZ superspac2",
+    "Neuron XY-Z sspac2"
+  ],
+  "external_identifiers": [
+    {
+      "resource_id": "FlyBase",
+      "external_id": "2"
+    },
+    {
+      "resource_id": "FlyBrain_NDB",
+      "external_id": "13"
+    }
+  ],
+  "classification": "FBbt_00005106",
+  "classification_comment": "Standard classification in absence of a neuron type",
+  "template_id": "VFB_00017894",
+  "imaging_type": "computer graphic",
+  "filename": "test2.png"
+},{
+  "primary_name": "Neuron XYZ superspaced2000",
+  "datasetid": "Zoglu2020",
+  "alternative_names": [
+    "Neuron XYZ superspac2",
+    "Neuron XY-Z sspac2"
+  ],
+  "external_identifiers": [
+    {
+      "resource_id": "FlyBase",
+      "external_id": "2000"
+    },
+    {
+      "resource_id": "FlyBrain_NDB",
+      "external_id": "130"
+    }
+  ],
+  "classification": "FBbt_00005106",
+  "classification_comment": "Standard classification in absence of a neuron type",
+  "template_id": "VFB_00017894",
+  "imaging_type": "computer graphic",
+  "filename": "test2.png"
+},{
+  "primary_name": "Neuron XYZ superspaced342",
+  "datasetid": "Zoglu2020",
+  "alternative_names": [
+    "Neuron XYZ superspac209",
+    "Neuron XY-Z sspac32"
+  ],
+  "external_identifiers": [
+    {
+      "resource_id": "FlyBase",
+      "external_id": "2x"
+    },
+    {
+      "resource_id": "FlyBrain_NDB",
+      "external_id": "134"
+    }
+  ],
+  "classification": "FBbt_00005106",
+  "classification_comment": "Standard classification in absence of a neuron type",
+  "template_id": "VFB_00017894",
+  "imaging_type": "computer graphic",
+  "filename": "test2.png"
+},{
+  "primary_name": "Neuron XYZ superspacedxxxxx",
+  "datasetid": "Zoglu2020",
+  "alternative_names": [
+    "Neuron XYZ superspacxxxx",
+    "Neuron XY-Z sspac2xx"
+  ],
+  "external_identifiers": [
+    {
+      "resource_id": "FlyBase",
+      "external_id": "2xx"
+    },
+    {
+      "resource_id": "FlyBrain_NDB",
+      "external_id": "13xx"
+    }
+  ],
+  "classification": "FBbt_00005106",
+  "classification_comment": "Standard classification in absence of a neuron type",
+  "template_id": "VFB_00017894",
+  "imaging_type": "computer graphic",
+  "filename": "test2.png"
+},{
+  "primary_name": "Neuron XYZ superspaced222",
+  "datasetid": "Zoglu2020",
+  "alternative_names": [
+    "Neuron XYZ superspac222",
+    "Neuron XY-Z sspac2222"
+  ],
+  "external_identifiers": [
+    {
+      "resource_id": "FlyBase",
+      "external_id": "22222"
+    },
+    {
+      "resource_id": "FlyBrain_NDB",
+      "external_id": "132222"
+    }
+  ],
+  "classification": "FBbt_00005106",
+  "classification_comment": "Standard classification in absence of a neuron type",
+  "template_id": "VFB_00017894",
+  "imaging_type": "computer graphic",
+  "filename": "test2.png"
+},{
+  "primary_name": "Neuron XYZ superspaced22",
+  "datasetid": "Zoglu2020",
+  "alternative_names": [
+    "Neuron XYZ superspac22",
+    "Neuron XY-Z sspac22"
+  ],
+  "external_identifiers": [
+    {
+      "resource_id": "FlyBase",
+      "external_id": "22"
+    },
+    {
+      "resource_id": "FlyBrain_NDB",
+      "external_id": "132"
+    }
+  ],
+  "classification": "FBbt_00005106",
+  "classification_comment": "Standard classification in absence of a neuron type",
+  "template_id": "VFB_00017894",
+  "imaging_type": "computer graphic",
+  "filename": "test2.png"
+}]}

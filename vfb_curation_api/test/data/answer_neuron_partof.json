@@ -1,0 +1,34 @@
+{
+  "neurons": [
+    {
+      "id": "http://virtualflybrain.org/reports/VFB_00012346",
+      "primary_name": "Neuron XYZ superspaced",
+      "datasetid": "http://virtualflybrain.org/data/Zoglu2020",
+      "projectid": "http://virtualflybrain.org/project/ABCD",
+      "alternative_names": [
+        "Neuron XYZ superspac",
+        "Neuron XY-Z sspac"
+      ],
+      "external_identifiers": [
+        {
+          "resource_id": "FlyBrain_NDB",
+          "external_id": "12"
+        },
+        {
+          "resource_id": "FlyBase",
+          "external_id": "1"
+        }
+      ],
+      "classification": "http://purl.obolibrary.org/obo/FBbt_00005106",
+      "classification_comment": null,
+      "template_id": "VFB_00017894",
+      "imaging_type": "computer graphic",
+      "filename": "test1.png",
+      "driver_line": [],
+      "neuropils": [],
+      "part_of": ["FBbt_00005106"],
+      "input_neuropils": [],
+      "output_neuropils": []
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{ "neurons": [{
+  "primary_name": "Neuron XYZ superspaced",
+  "datasetid": "Zoglu20201",
+  "alternative_names": [
+    "Neuron XYZ superspac",
+    "Neuron XY-Z sspac"
+  ],
+  "external_identifiers": [
+    {
+      "resource_id": "FlyBase",
+      "external_id": "1"
+    },
+    {
+      "resource_id": "FlyBrain_NDB",
+      "external_id": "12"
+    }
+  ],
+  "classification": "FBbt_00005106",
+  "classification_comment": "Standard classification in absence of a neuron type",
+  "template_id": "VFB_00017894",
+  "imaging_type": "computer graphic",
+  "filename": "test1.png"
+}]}

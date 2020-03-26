@@ -1,0 +1,10 @@
+{
+  "id": "http://virtualflybrain.org/data/TestDS",
+  "short_name": "TestDS",
+  "projectid": "ABCD",
+  "title": "Test DS",
+  "publication": null,
+  "source_data": null,
+  "description": "['Test DS description']",
+  "license": null
+}

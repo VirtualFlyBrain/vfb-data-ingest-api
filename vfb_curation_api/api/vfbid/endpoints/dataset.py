@@ -3,6 +3,7 @@ import json
 from flask import request
 from flask_restplus import Resource, reqparse, marshal
 from vfb_curation_api.api.vfbid.business import create_dataset, valid_user
+from vfb_curation_api.api.vfbid.errorcodes import INVALID_APIKEY, UNKNOWNERROR
 from vfb_curation_api.api.vfbid.serializers import dataset
 from vfb_curation_api.api.restplus import api
 from vfb_curation_api.database.repository import db
@@ -20,20 +21,22 @@ class DatasetResource(Resource):
     @api.response(201, 'Dataset successfully created.')
     @api.expect(dataset)
     @api.marshal_with(dataset)
-    @api.param('projectid', 'The four letter ID of your Project.', required=True)
     def post(self):
+        out = dict()
         parser = reqparse.RequestParser()
         parser.add_argument('apikey', type=str, required=True)
         parser.add_argument('orcid', type=str, required=True)
-        parser.add_argument('projectid', type=str, required=True)
         args = parser.parse_args()
         apikey = args['apikey']
         orcid = args['orcid']
-        project = args['projectid']
         if valid_user(apikey, orcid):
-            datasetid = create_dataset(request.json, project, orcid)
+            datasetid = create_dataset(request.json, orcid)
+            if isinstance(datasetid, dict) and 'error' in datasetid:
+                return datasetid
             return db.get_dataset(datasetid, orcid), 201
-        return "{ error: 'Invalid API Key' }"
+        out['error'] = "Invalid API Key"
+        out['code'] = INVALID_APIKEY
+        return out
 
     @api.response(404, 'Dataset not found.')
     @api.param('datasetid', 'Dataset id', required=True)
