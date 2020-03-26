@@ -29,9 +29,6 @@ class VFBKB():
             self.kb = os.getenv('KBserver')
             self.user = os.getenv('KBuser')
             self.password = os.getenv('KBpassword')
-            print(self.kb)
-            print(self.user)
-            print(self.password)
             try:
                 if self.db_client=="vfb":
                     self.db = neo4j_connect(self.kb, self.user, self.password)
@@ -64,9 +61,9 @@ class VFBKB():
     def parse_vfb_client_data(self, data_in):
         data = []
         for d_in in data_in:
-            print(d_in)
+            #print(d_in)
             columns = d_in['columns']
-            print(columns)
+            #print(columns)
             for rec in d_in['data']:
                 d = dict()
                 print(rec)
@@ -74,24 +71,24 @@ class VFBKB():
                     print(i)
                     d[columns[i]]=rec['row'][i]
                 data.append(d)
-        print("DATAOUT: " + str(data))
+        #print("DATAOUT: " + str(data))
         return data
 
     def parse_neo4j_default_client_data(self, data_in):
-        print("DATAIN: " + str(data_in.rows))
+        #print("DATAIN: " + str(data_in.rows))
         data = []
         columns = []
         if data_in.rows:
             for c in data_in.rows[0]:
                 columns.append(c)
-        print(str(columns))
+        #print(str(columns))
         if data_in.rows:
             for d_row in data_in.rows:
                 d = dict()
                 for c in columns:
                     d[c] = d_row[c]
                 data.append(d)
-        print("DATAOUT: " + str(data))
+        #print("DATAOUT: " + str(data))
         return data
 
     def query(self,q):
@@ -111,12 +108,11 @@ class VFBKB():
                 'grant_type': 'authorization_code',
                 'code': "{}".format(code),
                 'redirect_uri': redirect_uri }
-        print(data)
+        #print(data)
         # sending post request and saving response as response object
         r = requests.post(url=self.authorisation_token_endpoint, data=data)
-        print(r.text)
+        #print(r.text)
         d = json.loads(r.text)
-        print(d['orcid'])
         # {"access_token","token_type","refresh_token","expires_in","scope","name":"Nicolas Matentzoglu","orcid":"0000-0002-7356-1779"}
         orcid = "https://orcid.org/{}".format(d['orcid'])
         return self.get_user(orcid)
@@ -214,7 +210,6 @@ collect(DISTINCT inp.short_form) as input_neuropils,
 collect(DISTINCT onp.short_form) as output_neuropils"""
         rels = {}
         results = self.query(q=q)
-        print(results)
         if not results:
             raise VFBError("Neuron does not exist, or could not be retrieved.")
         for r in results:
@@ -228,8 +223,6 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
             for i in ["classification","classification_comment",
                       "imaging_type", "filename", "template_id"]:
                 rels[i] = r[i] # This assumes there is really just one match. Which there is if the KB is consistent
-        print("-------------------------9------")
-        print(rels)
         return rels
 
     def _get_neuron_return_clause(self):
@@ -313,7 +306,6 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
         q = q + "}) RETURN p.iri as id, p.label as primary_name, p.apikey as apikey"
         results = self.query(q=q)
         if len(results) == 1:
-            print(results[0])
             return User(results[0]['id'], results[0]['primary_name'], results[0]['apikey'])
         raise InvalidUserException("User with orcid id {} does not exist.".format(orcid))
 
@@ -367,8 +359,6 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
     ################################
 
     def create_dataset(self, Dataset, project, orcid):
-        print("9999998238989898989")
-        print(Dataset.description)
         errors = []
         if self.has_project_write_permission(project, orcid):
             if self.db_client=="vfb":
@@ -407,13 +397,8 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
         if s > start:
             start = s
         for neuron in neurons:
-            print("HOLYHOLY")
             if isinstance(neuron, Neuron):
                 try:
-                    print(start)
-                    print(neuron)
-                    print(datasetid)
-                    print(orcid)
                     success = self.add_neuron_db(neuron, datasetid, start)
                     if success:
                         ids.append(success)
@@ -426,9 +411,7 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
             else:
                 print("{} is not a neuron".format(neuron))
         if commit:
-            print("COMMITTTTING")
             commit_return = self.kb_owl_pattern_writer.commit()
-            print(commit_return)
             if commit_return:
                 return ids
             else:
@@ -441,13 +424,6 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
 
     def add_neuron_db(self, Neuron, datasetid, start):
         # make sure datasetid is the short form.
-        print("ABCDEFG")
-        print(datasetid)
-        print(Neuron.imaging_type)
-        print(Neuron.primary_name)
-        print(start)
-        print(Neuron.template_id)
-        print(Neuron.filename)
 
         if self.db_client=="vfb":
             rv = self.kb_owl_pattern_writer.add_anatomy_image_set(
@@ -479,14 +455,11 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
         # [(r,o),(r2,o2)]
         aa = []
         if isinstance(neuron, Neuron):
-            print("|||||||||||||||||||||||||")
-            print(neuron.part_of)
             aa = self._add_type(neuron.part_of, "BFO_0000050",aa)
             aa = self._add_type(neuron.driver_line, "RO_0002292", aa)
             aa = self._add_type(neuron.neuropils, "RO_0002131", aa)
             aa = self._add_type(neuron.input_neuropils, "RO_0002110", aa)
             aa = self._add_type(neuron.output_neuropils, "RO_0002113", aa)
-        print(aa)
         return aa
 
     def _add_type(self, n_typ, rel, l):
@@ -494,10 +467,6 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
             for e in n_typ:
                 l.append((rel,e))
         return l
-
-
-
-        return aa
 
     def get_xrefs(self, xrefs):
         aa = dict()
