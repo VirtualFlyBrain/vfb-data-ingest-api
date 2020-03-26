@@ -165,7 +165,7 @@ class VFBKB():
         q = self._get_dataset_permission_clause(orcid,datasetid,project)
         q = q + "MATCH (i  "
         if neuronid:
-            q = q + "{iri: '%s'}" % self._format_vfb_id(neuronid, "report")
+            q = q + "{iri: '%s'}" % self._format_vfb_id(neuronid, "reports")
         q = q + ")-[:has_source]->(d) "
         return q
 
@@ -188,7 +188,7 @@ class VFBKB():
         return map
 
     def _get_neuron_relations(self,neuronid):
-        q = "MATCH (i  {iri: '%s'})-[r]-(q)  " % self._format_vfb_id(neuronid,"report")
+        q = "MATCH (i  {iri: '%s'})-[r]-(q)  " % self._format_vfb_id(neuronid,"reports")
         q = q + """
 MATCH (i)-[cr:database_cross_reference]-(xref:Site)
 MATCH (i)-[cli:INSTANCEOF]-(cl:Class)
@@ -215,6 +215,8 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
         rels = {}
         results = self.query(q=q)
         print(results)
+        if not results:
+            raise VFBError("Neuron does not exist, or could not be retrieved.")
         for r in results:
             d = dict()
             d['resource_id'] = r['resource_id']
@@ -226,6 +228,8 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
             for i in ["classification","classification_comment",
                       "imaging_type", "filename", "template_id"]:
                 rels[i] = r[i] # This assumes there is really just one match. Which there is if the KB is consistent
+        print("-------------------------9------")
+        print(rels)
         return rels
 
     def _get_neuron_return_clause(self):
@@ -270,26 +274,28 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
         q = q + self._get_neuron_return_clause()
         results = self.query(q=q)
         if len(results) == 1:
-            n = Neuron(primary_name=results[0]['primary_name'])
-            n.set_id(id=results[0]['id'])
-            n.set_alternative_names(results[0]['syns'])
-            n.set_datasetid(results[0]['datasetid'])
-            n.set_project_id(results[0]['projectid'])
-            neuron_rels = self._get_neuron_relations(results[0]['id'])
-            n.set_external_identifiers(neuron_rels['cross_references'])
-            n.set_classification(neuron_rels['classification'])
-            n.set_classification_comment(neuron_rels['classification_comment'])
-            n.set_imaging_type(neuron_rels['imaging_type'])
-            n.set_neuropils(neuron_rels['neuropils'])
-            n.set_input_neuropils(neuron_rels['input_neuropils'])
-            n.set_output_neuropils(neuron_rels['output_neuropils'])
-            n.set_driver_line(neuron_rels['driver_line'])
-            n.set_part_of(neuron_rels['part_of'])
-            n.set_filename(neuron_rels['filename'])
-            n.set_template_id(neuron_rels['template_id'])
-
+            try:
+                n = Neuron(primary_name=results[0]['primary_name'])
+                n.set_id(id=results[0]['id'])
+                n.set_alternative_names(results[0]['syns'])
+                n.set_datasetid(results[0]['datasetid'])
+                n.set_project_id(results[0]['projectid'])
+                neuron_rels = self._get_neuron_relations(results[0]['id'])
+                n.set_external_identifiers(neuron_rels['cross_references'])
+                n.set_classification(neuron_rels['classification'])
+                n.set_classification_comment(neuron_rels['classification_comment'])
+                n.set_imaging_type(neuron_rels['imaging_type'])
+                n.set_neuropils(neuron_rels['neuropils'])
+                n.set_input_neuropils(neuron_rels['input_neuropils'])
+                n.set_output_neuropils(neuron_rels['output_neuropils'])
+                n.set_driver_line(neuron_rels['driver_line'])
+                n.set_part_of(neuron_rels['part_of'])
+                n.set_filename(neuron_rels['filename'])
+                n.set_template_id(neuron_rels['template_id'])
+            except Exception as e:
+                return self.wrap_error(["Neuron {} could not be retrieved".format(id)], INVALID_NEURON)
             return n
-        raise NeuronNotExistsError("Neuron with id {} does not exist.".format(id))
+        return self.wrap_error(["Neuron {} could not be retrieved".format(id)], INVALID_NEURON)
 
     def get_neuron(self, id, orcid):
         if isinstance(id,list):
@@ -353,10 +359,8 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
         q = self._get_dataset_permission_clause(orcid=orcid,datasetid=datasetid) + self._get_project_return_clause()
         results = self.query(q=q)
         if len(results) == 1:
-            print(results[0]['start'])
-        print("No start range found for dataset {}, starting from 0.".format(datasetid))
-        # LET
-        return 0
+            return results[0]['start']
+        raise VFBError("No start range found for dataset {}, starting from 0.".format(datasetid))
 
     ################################
     #### Data ingestion ############
@@ -516,6 +520,10 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
                     "code": code,
                     "message": message_json,
                 }}
+
+    def clear_neo_logs(self):
+        self.kb_owl_pattern_writer.get_log()
+        self.self.kb_owl_pattern_writer.ec.log
 
 
 class IllegalProjectError(Exception):

@@ -1,6 +1,6 @@
 MERGE (n1:Project {iri:'http://virtualflybrain.org/project/ABCD', start: 100, short_form: "ABCD"})
-MERGE (n2:Project {iri:'http://virtualflybrain.org/project/BCDE', short_form: "BCDE"})
-MERGE (n3:Project {iri:'http://virtualflybrain.org/project/CDEF', short_form: "CDEF"})
+MERGE (n2:Project {iri:'http://virtualflybrain.org/project/BCDE', start: 1000, short_form: "BCDE"})
+MERGE (n3:Project {iri:'http://virtualflybrain.org/project/CDEF', start: 999, short_form: "CDEF"})
 MERGE (p1:Person {iri:'https://orcid.org/0000-0002-7356-1779', apikey: 'xyz', label: "Nico"})
 MERGE (p2:Person {iri:'https://orcid.org/4321', apikey: 'wyz', label: "Terminator"})
 MERGE (d1:DataSet:Individual {iri:'http://virtualflybrain.org/data/Zoglu2020', short_form:'Zoglu2020', label:'ZOG20', production: false})

@@ -59,12 +59,19 @@ assert 'start' in data[0]
 
 print("Testing get project endpoint")
 params['projectid'] = "ABCD"
-r = requests.get(url="{}/{}/".format(api,"projects"), params=params)
+r = requests.get(url="{}/{}/".format(api,"project"), params=params)
 data = r.json()
-assert 'primary_name' in data[0]
-assert 'id' == "ABCD"
-assert 'description' in data[0]
-assert 'start' in data[0]
+assert 'primary_name' in data
+assert data['id'] == "ABCD"
+assert 'description' in data
+assert 'start' in data
+
+print("Testing get neuron endpoint")
+params['neuronid'] = "http://virtualflybrain.org/reports/VFB_0000ABCD"
+r = requests.get(url="{}/{}/".format(api,"neuron"), params=params)
+data = r.json()
+assert 'error' in data
+
 
 
 

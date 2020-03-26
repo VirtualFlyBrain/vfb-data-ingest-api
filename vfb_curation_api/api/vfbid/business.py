@@ -1,5 +1,7 @@
 from vfb_curation_api.database.models import Neuron, Dataset, Project, NeuronType, Site
 from vfb_curation_api.database.repository import db
+from vfb_curation_api.api.vfbid.errorcodes import UNKNOWNERROR
+
 
 def create_dataset(data, orcid):
     short_name = data.get('short_name')
@@ -52,7 +54,12 @@ def create_neuron(data_all, orcid):
         n.set_input_neuropils(input_neuropils)
         n.set_output_neuropils(output_neuropils)
         neurons.append(n)
-    return db.create_neuron_db(neurons=neurons,datasetid=datasetid,orcid=orcid)
+    try:
+        result = db.create_neuron_db(neurons=neurons,datasetid=datasetid,orcid=orcid)
+        return result
+    except Exception as e:
+        db.clear_neo_logs()
+        return db.wrap_error(["Unknown error has occured while adding neurons ({})".format(str(type(e)))], UNKNOWNERROR)
 
 
 def create_project(data):

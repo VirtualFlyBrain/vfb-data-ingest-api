@@ -36,6 +36,8 @@ class NeuronResource(Resource):
                     return nid
                 else:
                     n = db.get_neuron(nid, orcid=orcid)
+                    print("0-0-0-0-0-0")
+                    print(n)
                     out['neurons'] = marshal(n, neuron)
                     return out, 201
             else:
@@ -55,7 +57,6 @@ class NeuronResource(Resource):
 
     @api.param('neuronid', 'Neuron id', required=True)
     @api.response(404, 'Dataset not found.')
-    @api.marshal_with(neuron)
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument('apikey', type=str, required=True)
@@ -65,6 +66,23 @@ class NeuronResource(Resource):
         apikey = args['apikey']
         orcid = args['orcid']
         neuronid = args['neuronid']
-        if valid_user(apikey, orcid):
-            return db.get_neuron(neuronid, orcid)
-        return "{ error: 'Invalid API Key' }"
+        out = dict()
+        try:
+            if valid_user(apikey, orcid):
+                n = db.get_neuron(neuronid, orcid=orcid)
+                if isinstance(n,dict) and 'error' in n:
+                    return n
+                return marshal(n, neuron), 201
+            else:
+                out['error'] = {
+                    "code": INVALID_APIKEY,
+                    "message": 'Invalid API Key',
+                }
+            return out, 403
+        except Exception as e:
+            print(e)
+            out['error'] = {
+                "code": UNKNOWNERROR,
+                "message": str(type(e).__name__),
+            }
+        return out, 403
