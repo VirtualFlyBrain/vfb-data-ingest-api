@@ -363,7 +363,7 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
         if self.has_project_write_permission(project, orcid):
             if self.db_client=="vfb":
                 datasetid = self.kb_owl_pattern_writer.add_dataSet(Dataset.title, Dataset.license, Dataset.short_name, pub=Dataset.publication,
-                        description=Dataset.description, dataset_spec_text='', site='')
+                        description=[Dataset.description], dataset_spec_text='', site='')
                 print("Determining success of added dataset by checking wether the log is empty.")
                 datasetid = Dataset.short_name
                 if not self.kb_owl_pattern_writer.ec.log:
