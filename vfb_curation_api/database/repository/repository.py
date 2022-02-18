@@ -186,11 +186,11 @@ class VFBKB():
     def _get_neuron_relations(self,neuronid):
         q = "MATCH (i  {iri: '%s'})-[r]-(q)  " % self._format_vfb_id(neuronid,"reports")
         q = q + """
-MATCH (i)-[cr:database_cross_reference]-(xref:Site)
 MATCH (i)-[cli:INSTANCEOF]-(cl:Class)
 MATCH (i)-[:Related {iri:"http://xmlns.com/foaf/0.1/depicts"}]-(c:Individual) 
 MATCH (c)-[ir:in_register_with]-(t:Template)
 MATCH (c)-[:Related {iri:"http://purl.obolibrary.org/obo/OBI_0000312"}]-(it) 
+OPTIONAL MATCH (i)-[cr:database_cross_reference]-(xref:Site)
 OPTIONAL MATCH (c)-[:Related {iri:"http://purl.obolibrary.org/obo/BFO_0000050"}]-(po) 
 OPTIONAL MATCH (c)-[:Related {iri:"http://purl.obolibrary.org/obo/RO_0002292"}]-(dl) 
 OPTIONAL MATCH (c)-[:Related {iri:"http://purl.obolibrary.org/obo/RO_0002131"}]-(np)
@@ -286,6 +286,7 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
                 n.set_filename(neuron_rels['filename'])
                 n.set_template_id(neuron_rels['template_id'])
             except Exception as e:
+                print(e)
                 return self.wrap_error(["Neuron {} could not be retrieved".format(id)], INVALID_NEURON)
             return n
         return self.wrap_error(["Neuron {} could not be retrieved".format(id)], INVALID_NEURON)
@@ -303,10 +304,10 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
         q = "MATCH (p:Person {iri:'%s'" % orcid
         if apikey:
             q = q + ", apikey: '%s'" % apikey
-        q = q + "}) RETURN p.iri as id, p.label as primary_name, p.apikey as apikey"
+        q = q + "}) RETURN p.iri as id, p.label as primary_name, p.apikey as apikey, p.role as role"
         results = self.query(q=q)
         if len(results) == 1:
-            return User(results[0]['id'], results[0]['primary_name'], results[0]['apikey'])
+            return User(results[0]['id'], results[0]['primary_name'], results[0]['apikey'], results[0]['role'])
         raise InvalidUserException("User with orcid id {} does not exist.".format(orcid))
 
     def _neo_dataset_marshal(self,row):
@@ -341,8 +342,11 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
         results = self.query(q=q)
         neurons = []
         for row in results:
-            n = Neuron(primary_name=row['primary_name'], id=row['id'])
-            n.set_datasets([datasetid])
+            # n = Neuron(primary_name=row['primary_name'], id=row['id'])
+            # n.set_datasets([datasetid])
+            n = Neuron(primary_name=row['primary_name'])
+            n.set_id(row['id'])
+            n.set_datasetid(datasetid)
             n.set_project_id(row['projectid'])
             neurons.append(n)
         return neurons
@@ -407,6 +411,7 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
                         errors.extend(self.kb_owl_pattern_writer.ec.log)
                 except Exception as e:
                     commit = False
+                    print(e)
                     errors.append("{}".format(e))
             else:
                 print("{} is not a neuron".format(neuron))

@@ -91,6 +91,7 @@ user = api.model('User', {
     'orcid': fields.String(readonly=True, description='The ORCID for this user.'),
     'primary_name': fields.String(readonly=False, description='The name of this user.'),
     'apikey': fields.String(readonly=False, description='The current API key for this user.'),
+    'role': fields.String(readonly=False, description='The role of this user.'),
     'manages_projects': fields.List(fields.String(readonly=False), description='A list of project ids this user manages.'),
 })
 
