@@ -191,11 +191,11 @@ MATCH (i)-[:Related {iri:"http://xmlns.com/foaf/0.1/depicts"}]-(c:Individual)
 MATCH (c)-[ir:in_register_with]-(t:Template)
 MATCH (c)-[:Related {iri:"http://purl.obolibrary.org/obo/OBI_0000312"}]-(it) 
 OPTIONAL MATCH (i)-[cr:database_cross_reference]-(xref:Site)
-OPTIONAL MATCH (c)-[:Related {iri:"http://purl.obolibrary.org/obo/BFO_0000050"}]-(po) 
-OPTIONAL MATCH (c)-[:Related {iri:"http://purl.obolibrary.org/obo/RO_0002292"}]-(dl) 
-OPTIONAL MATCH (c)-[:Related {iri:"http://purl.obolibrary.org/obo/RO_0002131"}]-(np)
-OPTIONAL MATCH (c)-[:Related {iri:"http://purl.obolibrary.org/obo/RO_0002110"}]-(inp) 
-OPTIONAL MATCH (c)-[:Related {iri:"http://purl.obolibrary.org/obo/RO_0002113"}]-(onp) 
+OPTIONAL MATCH (i)-[:Related {iri:"http://purl.obolibrary.org/obo/BFO_0000050"}]-(po) 
+OPTIONAL MATCH (i)-[:Related {iri:"http://purl.obolibrary.org/obo/RO_0002292"}]-(dl) 
+OPTIONAL MATCH (i)-[:Related {iri:"http://purl.obolibrary.org/obo/RO_0002131"}]-(np)
+OPTIONAL MATCH (i)-[:Related {iri:"http://purl.obolibrary.org/obo/RO_0002110"}]-(inp) 
+OPTIONAL MATCH (i)-[:Related {iri:"http://purl.obolibrary.org/obo/RO_0002113"}]-(onp) 
 RETURN xref.short_form as resource_id, 
 cr.accession as external_id, 
 t.short_form as template_id, 
@@ -438,6 +438,7 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
                 start=start, # we need to do this on api level so that batching is not a bottleneck. we dont want 1 lookup per new image just to get the range!
                 template=Neuron.template_id, #VFB id or template name
                 anatomical_type=Neuron.classification, #default NEURON VFB/FBBT ID (short_form).
+                type_edge_annotations={"comment": Neuron.classification_comment},
                 anon_anatomical_types=self.get_anon_anatomical_types(Neuron),
                 anatomy_attributes=self.get_anatomy_attributes(Neuron),
                 dbxrefs=self.get_xrefs(Neuron.external_identifiers),
