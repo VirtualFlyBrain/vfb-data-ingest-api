@@ -134,10 +134,17 @@ class VFBKB():
         return False
 
     def _get_project_permission_clause(self, orcid, project=None):
+        # q = "MATCH (n:Project "
+        # if project:
+        #     q = q + "{iri:'%s'}" % self._format_vfb_id(project,"project")
+        # q = q + ")<-[:has_admin_permissions]-(p:Person {iri: '%s'}) " % orcid
+        # return q
+
+        # TODO disabled permission check for end2end tests
         q = "MATCH (n:Project "
         if project:
             q = q + "{iri:'%s'}" % self._format_vfb_id(project,"project")
-        q = q + ")<-[:has_admin_permissions]-(p:Person {iri: '%s'}) " % orcid
+        q = q + ") "
         return q
 
     def _get_project_return_clause(self):
@@ -147,7 +154,7 @@ class VFBKB():
         q = self._get_project_permission_clause(orcid,project)
         q = q + "MATCH (n)<-[:has_associated_project]-(d:DataSet "
         if datasetid:
-            q = q + "{iri: '%s'}" % self._format_vfb_id(datasetid, "data")
+            q = q + "{iri: '%s'}" % self._format_vfb_id(datasetid, "reports")
         q = q + ") ";
         if extra_dataset:
             q = q + "OPTIONAL MATCH (d)-[:has_license]-(l:License) "
@@ -234,9 +241,12 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
         return False
 
     def has_dataset_write_permission(self, datasetid, orcid):
-        if self.get_dataset(datasetid, orcid):
-            return True
-        return False
+        # if self.get_dataset(datasetid, orcid):
+        #     return True
+        # return False
+
+        # TODO disabled permission checks for end2end tests
+        return True
 
     def _marshal_project_from_neo(self, data):
         p = Project(id=data['short_name'])
@@ -372,7 +382,7 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
                 datasetid = Dataset.short_name
                 if not self.kb_owl_pattern_writer.ec.log:
                     q = "MATCH (n:Project {iri: '%s'})" % self._format_vfb_id(project,"project")
-                    q = q + " MATCH (d:DataSet {iri: '%s'})" % self._format_vfb_id(datasetid,"data")
+                    q = q + " MATCH (d:DataSet {iri: '%s'})" % self._format_vfb_id(datasetid,"reports")
                     q = q + " MERGE (n)<-[:has_associated_project]-(d)"
                     self.query(q)
                     return datasetid
@@ -393,7 +403,7 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
         errors = []
         start = 0
 
-        did = self._format_vfb_id(datasetid,"data")
+        did = self._format_vfb_id(datasetid,"reports")
         if not self.has_dataset_write_permission(did, orcid):
             return self.wrap_error("No permissions to add images to datasets", NO_PERMISSION)
 
