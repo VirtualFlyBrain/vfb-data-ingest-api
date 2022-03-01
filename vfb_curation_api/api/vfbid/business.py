@@ -1,3 +1,4 @@
+import sys
 from vfb_curation_api.database.models import Neuron, Dataset, Project, NeuronType, Site
 from vfb_curation_api.database.repository import db
 from vfb_curation_api.api.vfbid.errorcodes import UNKNOWNERROR
@@ -59,7 +60,8 @@ def create_neuron(data_all, orcid):
         return result
     except Exception as e:
         db.clear_neo_logs()
-        print(e)
+        print(e.with_traceback())
+        print(sys.exc_info()[2])
         return db.wrap_error(["Unknown error has occured while adding neurons ({})".format(str(type(e)))], UNKNOWNERROR)
 
 

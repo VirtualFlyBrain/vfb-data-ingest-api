@@ -1,3 +1,5 @@
+from enum import Enum
+
 
 class Dataset:
     def __init__(self, id, short_name, title):
@@ -130,14 +132,18 @@ class Project:
 
 
 class User:
-    def __init__(self, orcid, primary_name, apikey):
+    def __init__(self, orcid, primary_name, apikey, role=None):
         self.orcid = orcid
         self.primary_name = primary_name
         self.apikey = apikey
+        self.role = role
         self.manages_projects = []
 
     def __repr__(self):
         return '<User %r>' % self.id
+
+
+Role = Enum('Role', 'admin user')
 
 
 class NeuronType:
