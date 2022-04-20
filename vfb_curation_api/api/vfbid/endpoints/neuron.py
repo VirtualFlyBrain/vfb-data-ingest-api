@@ -38,8 +38,15 @@ class NeuronResource(Resource):
                     n = db.get_neuron(nid, orcid=orcid)
                     print("0-0-0-0-0-0")
                     print(n)
-                    out['neurons'] = marshal(n, neuron)
-                    return out, 201
+                    if isinstance(n, list) \
+                            and any(isinstance(n_result, dict) for n_result in n) \
+                            and any("error" in n_result for n_result in n):
+                        return n, 403
+                    elif "error" in n:
+                        return n, 403
+                    else:
+                        out['neurons'] = marshal(n, neuron)
+                        return out, 201
             else:
                 out['error'] = {
                         "code": INVALID_APIKEY,
