@@ -132,11 +132,12 @@ class Project:
 
 
 class User:
-    def __init__(self, orcid, primary_name, apikey, role=None):
+    def __init__(self, orcid, primary_name, apikey, role=None, email=None):
         self.orcid = orcid
         self.primary_name = primary_name
         self.apikey = apikey
         self.role = role
+        self.email = email
         self.manages_projects = []
 
     def __repr__(self):

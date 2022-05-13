@@ -314,10 +314,11 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
         q = "MATCH (p:Person {iri:'%s'" % orcid
         if apikey:
             q = q + ", apikey: '%s'" % apikey
-        q = q + "}) RETURN p.iri as id, p.label as primary_name, p.apikey as apikey, p.role as role"
+        q = q + "}) RETURN p.iri as id, p.label as primary_name, p.apikey as apikey, p.role as role, p.email as email"
         results = self.query(q=q)
         if len(results) == 1:
-            return User(results[0]['id'], results[0]['primary_name'], results[0]['apikey'], results[0]['role'])
+            return User(results[0]['id'], results[0]['primary_name'], results[0]['apikey'],
+                        results[0]['role'], results[0]['email'])
         raise InvalidUserException("User with orcid id {} does not exist.".format(orcid))
 
     def _neo_dataset_marshal(self,row):
@@ -377,14 +378,17 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
         if self.has_project_write_permission(project, orcid):
             if self.db_client=="vfb":
                 datasetid = self.kb_owl_pattern_writer.add_dataSet(Dataset.title, Dataset.license, Dataset.short_name, pub=Dataset.publication,
-                        description=[Dataset.description], dataset_spec_text='', site='')
-                print("Determining success of added dataset by checking wether the log is empty.")
+                        description=Dataset.description, dataset_spec_text='', site='')
+                self.kb_owl_pattern_writer.commit()
+                print("Determining success of added dataset by checking weather the log is empty.")
                 datasetid = Dataset.short_name
                 if not self.kb_owl_pattern_writer.ec.log:
                     q = "MATCH (n:Project {iri: '%s'})" % self._format_vfb_id(project,"project")
                     q = q + " MATCH (d:DataSet {iri: '%s'})" % self._format_vfb_id(datasetid,"reports")
                     q = q + " MERGE (n)<-[:has_associated_project]-(d)"
-                    self.query(q)
+                    print(q)
+                    result = self.query(q)
+                    print(result)
                     return datasetid
                 else:
                     print("Added dataset: error log is not empty.")

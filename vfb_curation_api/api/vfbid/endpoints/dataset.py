@@ -20,7 +20,6 @@ class DatasetResource(Resource):
 
     @api.response(201, 'Dataset successfully created.')
     @api.expect(dataset)
-    @api.marshal_with(dataset)
     def post(self):
         out = dict()
         parser = reqparse.RequestParser()
@@ -32,11 +31,11 @@ class DatasetResource(Resource):
         if valid_user(apikey, orcid):
             datasetid = create_dataset(request.json, orcid)
             if isinstance(datasetid, dict) and 'error' in datasetid:
-                return datasetid
-            return db.get_dataset(datasetid, orcid), 201
+                return datasetid, 403
+            return datasetid, 201
         out['error'] = "Invalid API Key"
         out['code'] = INVALID_APIKEY
-        return out
+        return out, 403
 
     @api.response(404, 'Dataset not found.')
     @api.param('datasetid', 'Dataset id', required=True)

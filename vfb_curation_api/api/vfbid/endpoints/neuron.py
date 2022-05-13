@@ -42,7 +42,7 @@ class NeuronResource(Resource):
                             and any(isinstance(n_result, dict) for n_result in n) \
                             and any("error" in n_result for n_result in n):
                         return n, 403
-                    elif "error" in n:
+                    elif isinstance(n, dict) and 'error' in n:
                         return n, 403
                     else:
                         out['neurons'] = marshal(n, neuron)
