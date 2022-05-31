@@ -162,3 +162,27 @@ class Site:
         self.id = id
         self.url = ""
         self.short_form = ""
+
+
+class Split:
+    def __init__(self, id):
+        self.id = id
+        self.dbd = ""
+        self.ad = ""
+        self.synonyms = []
+        self.xrefs = []
+
+    def set_dbd(self, dbd):
+        self.dbd = dbd
+
+    def set_ad(self, ad):
+        self.ad = ad
+
+    def set_synonyms(self, synonyms):
+        self.synonyms = synonyms
+
+    def set_xrefs(self, xrefs):
+        self.xrefs = xrefs
+
+    def __repr__(self):
+        return '<Split %r>' % self.id

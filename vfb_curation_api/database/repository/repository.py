@@ -1,17 +1,20 @@
 from neo4jrestclient.client import GraphDatabase
-from vfb_curation_api.database.models import Neuron, Dataset, Project, User
-from vfb_curation_api.api.vfbid.errorcodes import NO_PERMISSION, INVALID_NEURON, UNKNOWNERROR, INVALID_DATASET
+from vfb_curation_api.database.models import Neuron, Dataset, Project, User, Split
+from vfb_curation_api.api.vfbid.errorcodes import NO_PERMISSION, INVALID_NEURON, UNKNOWNERROR, INVALID_DATASET, INVALID_SPLIT
 import os
 import json
 import requests
+import tempfile
 from vfb_curation_api.vfb.uk.ac.ebi.vfb.neo4j.neo4j_tools import neo4j_connect
 from vfb_curation_api.vfb.uk.ac.ebi.vfb.neo4j.KB_tools import KB_pattern_writer
 from vfb_curation_api.vfb.uk.ac.ebi.vfb.neo4j.KB_tools import kb_owl_edge_writer
+from vfb_curation_api.vfb.uk.ac.ebi.vfb.neo4j.flybase2neo.feature_tools import FeatureMover, split
 
 class VFBKB():
     def __init__(self):
         self.db = None
         self.kb_owl_pattern_writer = None
+        self.feature_mover = None
         self.max_base36 = 1679615  # Corresponds to the base36 value of ZZZZZZ
         self.db_client = "vfb"
         self.client_id = os.environ['CLIENT_ID_AUTHORISATION']
@@ -34,6 +37,7 @@ class VFBKB():
                     self.db = neo4j_connect(self.kb, self.user, self.password)
                     self.kb_owl_pattern_writer = KB_pattern_writer(self.kb, self.user, self.password)
                     self.kb_owl_edge_writer = kb_owl_edge_writer(self.kb, self.user, self.password)
+                    self.feature_mover = FeatureMover(self.kb, self.user, self.password, tempfile.gettempdir())
                 else:
                     self.db = GraphDatabase(self.kb, username=self.user, password=self.password)
                 self.prepare_database()
@@ -513,6 +517,50 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
     def clear_neo_logs(self):
         self.kb_owl_pattern_writer.get_log()
         self.self.kb_owl_pattern_writer.ec.log
+
+    def _get_split(self, splitid, orcid):
+        q = "MATCH (i  "
+        if splitid:
+            q = q + "{iri: '%s'})" % self._format_vfb_id(splitid, "reports")
+        q = q + " RETURN i.iri as id, i.label as label, i.synonyms as syns, i.xrefs as xrefs"
+
+        results = self.query(q=q)
+        if len(results) == 1:
+            try:
+                s = Split(results[0]['id'])
+                s.set_synonyms(results[0]['syns'])
+                s.set_xrefs(results[0]['xrefs'])
+            except Exception as e:
+                print("Split could not be retrieved: {}".format(e))
+                return self.wrap_error(["Split {} could not be retrieved".format(id)], INVALID_SPLIT)
+            return s
+        return self.wrap_error(["Split {} could not be retrieved".format(id)], INVALID_SPLIT)
+
+    def get_split(self, id, orcid):
+        if isinstance(id, list):
+            splits = []
+            for i in id:
+                splits.append(self._get_split(i, orcid))
+            return splits
+        else:
+            return self._get_split(id, orcid)
+
+    def create_split(self, split_data):
+        if self.db_client == "vfb":
+            s = split(synonyms=split_data.synonyms,
+                      dbd=split_data.dbd,
+                      ad=split_data.ad,
+                      xrefs=split_data.xrefs)
+            response = self.feature_mover.gen_split_ep_feat([s])
+
+            short_form = next(iter(response))
+            result = response[short_form]['attributes']
+            result['short_form'] = short_form
+            result['iri'] = response[short_form]['iri']
+            result['xrefs'] = response[short_form]['xrefs']
+            return result
+
+        raise VFBError('Splits cannot be added right now; please contact the VFB administrators.')
 
 
 class IllegalProjectError(Exception):

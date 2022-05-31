@@ -109,3 +109,11 @@ site = api.model('Site', {
     'url': fields.String(readonly=False, description='The unique identifier for this site or web resource.'),
     'short_form': fields.String(readonly=False, description='Short description of this site or web resource.'),
 })
+
+split = api.model('Split', {
+    'id': fields.String(readonly=True, description='The unique identifier for this split.'),
+    'dbd': fields.String(readonly=False, description='The DNA-binding domain (DBD) hemidriver.'),
+    'ad': fields.String(readonly=False, description='The activation domain (AD) hemidriver.'),
+    'synonyms': fields.List(fields.String(readonly=False), description='List of synonyms of this split.'),
+    'xrefs': fields.String(required=False, description='Associated xrefs.'),
+})

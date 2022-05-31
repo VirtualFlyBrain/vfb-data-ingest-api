@@ -1,5 +1,5 @@
 import sys
-from vfb_curation_api.database.models import Neuron, Dataset, Project, NeuronType, Site
+from vfb_curation_api.database.models import Neuron, Dataset, Project, NeuronType, Site, Split
 from vfb_curation_api.database.repository import db
 from vfb_curation_api.api.vfbid.errorcodes import UNKNOWNERROR
 
@@ -70,6 +70,7 @@ def create_project(data):
     ds = Project(projectid)
     return db.create_project_db(ds)
 
+
 def create_neuron_type(data):
     neuron_type_id = data.get('neuron_type_id')
     ds = NeuronType(neuron_type_id)
@@ -78,3 +79,15 @@ def create_neuron_type(data):
 
 def valid_user(apikey, orcid):
     return db.valid_user(apikey, orcid)
+
+
+def create_split(data):
+    split_id = data.get('split_id')
+    split = Split(split_id)
+    split.set_dbd(data.get('dbd'))
+    split.set_ad(data.get('ad'))
+    if 'synonyms' in data:
+        split.set_synonyms(data.get('synonyms'))
+    if 'xrefs' in data:
+        split.set_xrefs(data.get('xrefs'))
+    return db.create_split(split)
