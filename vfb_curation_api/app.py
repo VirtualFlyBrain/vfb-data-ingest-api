@@ -12,6 +12,9 @@ from vfb_curation_api.api.vfbid.endpoints.project import ns as project_namespace
 from vfb_curation_api.api.vfbid.endpoints.projects import ns as projects_namespace
 from vfb_curation_api.api.vfbid.endpoints.login import ns as login_namespace
 from vfb_curation_api.api.vfbid.endpoints.user import ns as user_namespace
+from vfb_curation_api.api.vfbid.endpoints.split import ns as split_namespace
+from vfb_curation_api.api.vfbid.endpoints.ep_split import ns as ep_split_namespace
+from vfb_curation_api.api.vfbid.endpoints.ep_split_flp_out import ns as ep_split_flp_out_namespace
 from vfb_curation_api.api.restplus import api
 
 app = Flask(__name__)
@@ -43,6 +46,9 @@ def initialize_app(flask_app):
     api.add_namespace(project_namespace)
     api.add_namespace(dataset_namespace)
     api.add_namespace(neuron_namespace)
+    api.add_namespace(split_namespace)
+    api.add_namespace(ep_split_namespace)
+    api.add_namespace(ep_split_flp_out_namespace)
     flask_app.register_blueprint(blueprint)
 
 
