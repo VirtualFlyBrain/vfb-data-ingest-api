@@ -1,5 +1,5 @@
 from neo4jrestclient.client import GraphDatabase
-from vfb_curation_api.database.models import Neuron, Dataset, Project, User, Split
+from vfb_curation_api.database.models import Neuron, Dataset, Project, User, Split, SplitDriver
 from vfb_curation_api.api.vfbid.errorcodes import NO_PERMISSION, INVALID_NEURON, UNKNOWNERROR, INVALID_DATASET, INVALID_SPLIT
 import os
 import json
@@ -411,7 +411,7 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
         errors = []
         start = 0
 
-        did = self._format_vfb_id(datasetid,"reports")
+        did = self._format_vfb_id(datasetid, "reports")
         if not self.has_dataset_write_permission(did, orcid):
             return self.wrap_error("No permissions to add images to datasets", NO_PERMISSION)
 
@@ -425,7 +425,7 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
                     if success:
                         ids.append(success)
                     else:
-                        commit = False;
+                        commit = False
                         errors.extend(self.kb_owl_pattern_writer.ec.log)
                 except Exception as e:
                     commit = False
@@ -468,17 +468,19 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
 
     def get_anatomy_attributes(self, neuron):
         aa = dict()
-        if isinstance(neuron, Neuron):
+        if isinstance(neuron, Neuron) or isinstance(neuron, SplitDriver):
             syns = neuron.alternative_names
             if syns:
                 # {"synonyms": ['a','b]}
                 aa['synonyms'] = syns
+            if neuron.comment:
+                aa['comment'] = neuron.comment
         return aa
 
     def get_anon_anatomical_types(self, neuron):
         # [(r,o),(r2,o2)]
         aa = []
-        if isinstance(neuron, Neuron):
+        if isinstance(neuron, Neuron) or isinstance(neuron, SplitDriver):
             aa = self._add_type(neuron.part_of, "BFO_0000050",aa)
             aa = self._add_type(neuron.driver_line, "RO_0002292", aa)
             aa = self._add_type(neuron.neuropils, "RO_0002131", aa)
@@ -527,7 +529,8 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
         results = self.query(q=q)
         if len(results) == 1:
             try:
-                s = Split(results[0]['id'])
+                s = Split("", "")
+                s.set_id(results[0]['id'])
                 s.set_synonyms(results[0]['syns'])
                 s.set_xrefs(results[0]['xrefs'])
             except Exception as e:
@@ -561,6 +564,142 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
             return result
 
         raise VFBError('Splits cannot be added right now; please contact the VFB administrators.')
+
+    def create_split_driver_db(self, split_drivers, datasetid, orcid, ep_split_flp_out):
+        commit = True
+        ids = []
+        errors = []
+        start = 0
+
+        did = self._format_vfb_id(datasetid, "reports")
+        if not self.has_dataset_write_permission(did, orcid):
+            return self.wrap_error("No permissions to add images to datasets", NO_PERMISSION)
+
+        s = self.get_id_start_range(datasetid, orcid)
+        if s > start:
+            start = s
+        for split_driver in split_drivers:
+            if isinstance(split_driver, SplitDriver):
+                try:
+                    success = self.add_split_driver_db(split_driver, datasetid, start, ep_split_flp_out)
+                    if success:
+                        ids.append(success)
+                    else:
+                        commit = False
+                        errors.extend(self.kb_owl_pattern_writer.ec.log)
+                except Exception as e:
+                    commit = False
+                    print(e)
+                    errors.append("{}".format(e))
+            else:
+                print("{} is not a split driver".format(split_driver))
+        if commit:
+            commit_return = self.kb_owl_pattern_writer.commit()
+            if commit_return:
+                return ids
+            else:
+                errors.extend(self.kb_owl_pattern_writer.get_log())
+                return self.wrap_error(errors, INVALID_NEURON)
+        else:
+            errors.extend(self.kb_owl_pattern_writer.ec.log)
+            return self.wrap_error(errors, INVALID_NEURON)
+
+    def add_split_driver_db(self, split_driver: SplitDriver, datasetid, start, ep_split_flp_out):
+        # make sure datasetid is the short form.
+        if self.db_client=="vfb":
+            aa = self.get_anon_anatomical_types(split_driver)
+            if ep_split_flp_out:
+                aa = self._add_type(split_driver.comment, "BFO_0000050", aa)
+                aa = self._add_type(split_driver.has_part, "BFO_0000051", aa)
+                at = "VFBext_0000004"  # 'expression pattern fragment'
+            else:
+                aa = self._add_type(split_driver.has_part, "BFO_0000051", aa)
+                if split_driver.driver_line and len(split_driver.driver_line) > 0:
+                    at = split_driver.driver_line[0]
+                else:
+                    at = split_driver.comment  # workaround since dl is not in pdb
+
+            rv = self.kb_owl_pattern_writer.add_anatomy_image_set(
+                dataset=datasetid,
+                imaging_type=split_driver.imaging_type,
+                label=split_driver.primary_name,
+                start=start, # we need to do this on api level so that batching is not a bottleneck. we dont want 1 lookup per new image just to get the range!
+                template=split_driver.template_id, #VFB id or template name
+                anatomical_type=at,  # should use driver_line, but this is workaround
+                type_edge_annotations={"comment": split_driver.classification_comment},
+                anon_anatomical_types=aa,
+                anatomy_attributes=self.get_anatomy_attributes(split_driver),
+                dbxrefs=self.get_xrefs(split_driver.external_identifiers),
+                image_filename=split_driver.filename,
+                hard_fail=False)
+            return rv['anatomy']['short_form']
+
+        raise VFBError('Images cannot be added right now; please contact the VFB administrators.')
+
+    # def _get_split_ep(self, splitid, orcid):
+    #     q = "MATCH (i  "
+    #     if splitid:
+    #         q = q + "{iri: '%s'})" % self._format_vfb_id(splitid, "reports")
+    #     q = q + " RETURN i.iri as id, i.label as label, i.comment as comment, i.synonyms as syns, i.xrefs as xrefs"
+    #
+    #     results = self.query(q=q)
+    #     if len(results) == 1:
+    #         try:
+    #             s = EpSplit(results[0]['id'])
+    #             s.set_primary_name(results[0]['label'])
+    #             s.set_comment(results[0]['comment'])
+    #             s.set_synonyms(results[0]['syns'])
+    #             s.set_xrefs(results[0]['xrefs'])
+    #         except Exception as e:
+    #             print("EP/Split could not be retrieved: {}".format(e))
+    #             return self.wrap_error(["EP/Split {} could not be retrieved".format(id)], INVALID_SPLIT)
+    #         return s
+    #     return self.wrap_error(["EP/Split {} could not be retrieved".format(id)], INVALID_SPLIT)
+
+    # def get_split_ep(self, id, orcid):
+    #     if isinstance(id, list):
+    #         splits = []
+    #         for i in id:
+    #             splits.append(self._get_split_ep(i, orcid))
+    #         return splits
+    #     else:
+    #         return self._get_split_ep(id, orcid)
+    #
+    # def create_ep_split(self, ep_split_data):
+    #     if self.db_client == "vfb":
+    #         aa = []
+    #         if ep_split_data.neuron_annotations:
+    #             aa = self._add_type(ep_split_data.neuron_annotations, "BFO_0000051", aa)  # has_part
+    #         rv = self.kb_owl_pattern_writer.add_anatomy_image_set(
+    #             label=ep_split_data.primary_name,
+    #             start=0,
+    #             anatomical_type=ep_split_data.expression_pattern,
+    #             anon_anatomical_types=aa,
+    #             anatomy_attributes=self.get_anatomy_attributes(Neuron),
+    #             dbxrefs=self.get_xrefs(ep_split_data.xrefs),
+    #             hard_fail=False)
+    #         return rv['anatomy']['short_form']
+    #
+    #     raise VFBError('EP/Splits cannot be added right now; please contact the VFB administrators.')
+    #
+    # def create_ep_split_flp_out(self, ep_split_data):
+    #     if self.db_client == "vfb":
+    #         aa = []
+    #         if ep_split_data.neuron_annotations:
+    #             aa = self._add_type(ep_split_data.neuron_annotations, "BFO_0000051", aa)  # has_part
+    #         if ep_split_data.expression_pattern:
+    #             aa = self._add_type(ep_split_data.expression_pattern, "BFO_0000050", aa)  # part_of
+    #         rv = self.kb_owl_pattern_writer.add_anatomy_image_set(
+    #             label=ep_split_data.primary_name,
+    #             start=0,
+    #             anatomical_type='expression pattern fragment',
+    #             anon_anatomical_types=aa,
+    #             anatomy_attributes=self.get_anatomy_attributes(Neuron),
+    #             dbxrefs=self.get_xrefs(ep_split_data.xrefs),
+    #             hard_fail=False)
+    #         return rv['anatomy']['short_form']
+    #
+    #     raise VFBError('EP/Splits cannot be added right now; please contact the VFB administrators.')
 
 
 class IllegalProjectError(Exception):

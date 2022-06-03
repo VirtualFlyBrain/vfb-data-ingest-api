@@ -40,7 +40,8 @@ class Neuron:
         self.projectid = ""
         # self.type_specimen = ""  # Removed for now, deal with this via add NeuronType
         self.alternative_names = []
-        self.external_identifiers = dict() # { GO: 001 }
+        self.external_identifiers = []
+        # self.external_identifiers = dict() # { GO: 001 }
         self.classification = "" # http://
         self.classification_comment = ""
         # self.url_skeleton_id = ""
@@ -52,6 +53,7 @@ class Neuron:
         self.neuropils = []  # overlaps’ http://purl.obolibrary.org/obo/RO_0002131
         self.input_neuropils = []  # ‘has postsynaptic terminal in’ http://purl.obolibrary.org/obo/RO_0002110
         self.output_neuropils = []  # ‘has presynaptic terminal in’  http://purl.obolibrary.org/obo/RO_0002113
+        self.comment = ""
 
     def set_id(self, id):
         self.id = id
@@ -73,9 +75,6 @@ class Neuron:
 
     def set_classification(self, classification):
         self.classification = classification
-
-    def set_type_specimen(self, type_specimen):
-        self.type_specimen = type_specimen
 
     def set_filename(self, filename):
         self.filename = filename
@@ -106,6 +105,9 @@ class Neuron:
 
     def set_imaging_type(self, imaging_type):
         self.imaging_type = imaging_type
+
+    def set_comment(self, comment):
+        self.comment = comment
 
     def __repr__(self):
         return '<Neuron %r>' % self.primary_name
@@ -165,12 +167,15 @@ class Site:
 
 
 class Split:
-    def __init__(self, id):
-        self.id = id
-        self.dbd = ""
-        self.ad = ""
+    def __init__(self, dbd, ad):
+        self.id = ""
+        self.dbd = dbd
+        self.ad = ad
         self.synonyms = []
         self.xrefs = []
+
+    def set_id(self, split_id):
+        self.id = split_id
 
     def set_dbd(self, dbd):
         self.dbd = dbd
@@ -186,3 +191,13 @@ class Split:
 
     def __repr__(self):
         return '<Split %r>' % self.id
+
+
+class SplitDriver(Neuron):
+
+    def __init__(self, primary_name):
+        super().__init__(primary_name)
+        self.has_part = []
+
+    def set_has_part(self, has_part):
+        self.has_part = has_part
