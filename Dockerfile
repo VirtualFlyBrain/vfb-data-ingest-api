@@ -1,4 +1,4 @@
-FROM python:3.6.2
+FROM python:3.8
 
 ENV KBserver=http://localhost:7474
 ENV KBuser=neo4j
