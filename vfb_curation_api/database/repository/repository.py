@@ -289,7 +289,7 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
                 n.set_project_id(results[0]['projectid'])
                 neuron_rels = self._get_neuron_relations(results[0]['id'])
                 n.set_external_identifiers(neuron_rels['cross_references'])
-                n.set_classification(neuron_rels['classification'])
+                n.set_classification([neuron_rels['classification']])
                 n.set_classification_comment(neuron_rels['classification_comment'])
                 n.set_imaging_type(neuron_rels['imaging_type'])
                 n.set_neuropils(neuron_rels['neuropils'])
@@ -455,7 +455,7 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
                 label=Neuron.primary_name,
                 start=start, # we need to do this on api level so that batching is not a bottleneck. we dont want 1 lookup per new image just to get the range!
                 template=Neuron.template_id, #VFB id or template name
-                anatomical_type=Neuron.classification, #default NEURON VFB/FBBT ID (short_form).
+                anatomical_type=Neuron.classification[0], #default NEURON VFB/FBBT ID (short_form).
                 type_edge_annotations={"comment": Neuron.classification_comment},
                 anon_anatomical_types=self.get_anon_anatomical_types(Neuron),
                 anatomy_attributes=self.get_anatomy_attributes(Neuron),
@@ -610,9 +610,11 @@ collect(DISTINCT onp.short_form) as output_neuropils"""
             aa = self.get_anon_anatomical_types(split_driver)
             if ep_split_flp_out:
                 aa = self._add_type(split_driver.comment, "BFO_0000050", aa)
+                aa = self._add_type(split_driver.classification, "BFO_0000051", aa)
                 aa = self._add_type(split_driver.has_part, "BFO_0000051", aa)
                 at = "VFBext_0000004"  # 'expression pattern fragment'
             else:
+                aa = self._add_type(split_driver.classification, "BFO_0000051", aa)
                 aa = self._add_type(split_driver.has_part, "BFO_0000051", aa)
                 if split_driver.driver_line and len(split_driver.driver_line) > 0:
                     at = split_driver.driver_line[0]
