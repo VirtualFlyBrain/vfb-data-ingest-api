@@ -198,15 +198,15 @@ class VFBKB():
         q = "MATCH (i  {iri: '%s'})-[r]-(q)  " % self._format_vfb_id(neuronid,"reports")
         q = q + """
 MATCH (i)-[cli:INSTANCEOF]-(cl:Class)
-MATCH (i)-[:Related {iri:"http://xmlns.com/foaf/0.1/depicts"}]-(c:Individual) 
+MATCH (i)-[ {iri:"http://xmlns.com/foaf/0.1/depicts"}]-(c:Individual) 
 MATCH (c)-[ir:in_register_with]-(t:Template)
-MATCH (c)-[:Related {iri:"http://purl.obolibrary.org/obo/OBI_0000312"}]-(it) 
+MATCH (c)-[ {iri:"http://purl.obolibrary.org/obo/OBI_0000312"}]-(it) 
 OPTIONAL MATCH (i)-[cr:database_cross_reference]-(xref:Site)
-OPTIONAL MATCH (i)-[:Related {iri:"http://purl.obolibrary.org/obo/BFO_0000050"}]-(po) 
-OPTIONAL MATCH (i)-[:Related {iri:"http://purl.obolibrary.org/obo/RO_0002292"}]-(dl) 
-OPTIONAL MATCH (i)-[:Related {iri:"http://purl.obolibrary.org/obo/RO_0002131"}]-(np)
-OPTIONAL MATCH (i)-[:Related {iri:"http://purl.obolibrary.org/obo/RO_0002110"}]-(inp) 
-OPTIONAL MATCH (i)-[:Related {iri:"http://purl.obolibrary.org/obo/RO_0002113"}]-(onp) 
+OPTIONAL MATCH (i)-[ {iri:"http://purl.obolibrary.org/obo/BFO_0000050"}]-(po) 
+OPTIONAL MATCH (i)-[ {iri:"http://purl.obolibrary.org/obo/RO_0002292"}]-(dl) 
+OPTIONAL MATCH (i)-[ {iri:"http://purl.obolibrary.org/obo/RO_0002131"}]-(np)
+OPTIONAL MATCH (i)-[ {iri:"http://purl.obolibrary.org/obo/RO_0002110"}]-(inp) 
+OPTIONAL MATCH (i)-[ {iri:"http://purl.obolibrary.org/obo/RO_0002113"}]-(onp) 
 RETURN xref.short_form as resource_id, 
 cr.accession as external_id, 
 t.short_form as template_id, 
