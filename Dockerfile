@@ -27,6 +27,8 @@ RUN echo "Installing VFB neo4j tools" && \
 cd /tmp && \
 git clone --quiet https://github.com/VirtualFlyBrain/VFB_neo4j.git
 
+RUN pip install -r /tmp/VFB_neo4j/requirements.txt
+
 RUN mkdir -p /code/vfb_curation_api/vfb && \
 mv /tmp/VFB_neo4j/src/* /code/vfb_curation_api/vfb
 
